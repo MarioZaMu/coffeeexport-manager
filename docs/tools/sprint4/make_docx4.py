@@ -436,7 +436,8 @@ def main():
         ["Pipeline de GitHub Actions y README", "Agente de IA", "Claude Code"],
         ["Prototipo de interfaz, rediseño de landing y pruebas del Sprint 3 (58)", "Agente de IA, dirigido por el equipo", "Claude Code"],
         ["Requisitos, historias de usuario, plan de pruebas y diseño del Sprint 1 y 2", "Equipo", "—"],
-        ["Fotos del producto, Jira, publicación y revisión final", "Equipo", "—"],
+        ["Descarga de las 11 fotos temporales de Unsplash al proyecto (frontend/img)", "Agente de IA", "Claude Code"],
+        ["Fotos propias, Jira, publicación y revisión final", "Equipo", "—"],
     ], [8, 5.2, 4.2], tam=9)
     parr(doc, "El detalle de qué integrante lideró cada módulo está en la presentación del Sprint 4 y en el tablero de Jira del equipo.")
 
@@ -446,7 +447,7 @@ def main():
               "Los 44 casos del plan del Sprint 2 pasaron de planificados a ejecutados con evidencia.",
               "Las pruebas encontraron 7 defectos reales; cada uno quedó corregido y cubierto por una prueba de regresión.",
               "El pipeline repite todo automáticamente en cada cambio y cada lunes, por lo que una regresión se detecta sin intervención humana.",
-              "**Pendiente:** correr la suite con MySQL real (perfil mysql), reemplazar las fotos temporales por las del equipo, y publicar la interfaz en Vercel en modo demostración."):
+              "**Pendiente:** correr la suite con MySQL real (perfil mysql), reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo, y publicar la interfaz en Vercel en modo demostración."):
         vineta(doc, s)
 
     # ---- anexos

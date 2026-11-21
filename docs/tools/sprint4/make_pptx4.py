@@ -333,13 +333,14 @@ def main():
         ["Conexión de la interfaz y 10 pruebas de sistema", "Sí", "Creó la capa api.js y las pruebas Playwright; halló y corrigió D-07", "Verificado con 68 de 68 en el frontend"],
         ["Pipeline de GitHub Actions y README", "Sí", "Escribió el flujo de trabajo y la documentación", "Se valida con la ejecución en GitHub"],
         ["Requisitos, plan de pruebas (Sprint 1 y 2)", "No", "—", "Responsables: el equipo"],
-        ["Fotos del producto, Jira y revisión final", "No", "—", "Responsables: el equipo"]], [3.6, 0.9, 4.0, 3.65], 11, 0.6, color_col=(1, {"Sí": VERDE, "No": GRIS}))
+        ["Descarga de las 11 fotos temporales al proyecto", "Sí", "Las descargó, las optimizó y cambió las rutas; repitió las 68 pruebas", "Verificado con 68 de 68 aprobadas"],
+        ["Fotos propias, Jira y revisión final", "No", "—", "Responsables: el equipo"]], [3.6, 0.9, 4.0, 3.65], 11, 0.55, color_col=(1, {"Sí": VERDE, "No": GRIS}))
 
     # 13 bloqueos
     sl = nueva(prs, "Bloqueos encontrados y soluciones", "Qué nos frenó y cómo se resolvió",
                "Estos fueron los bloqueos principales. El más grande: el backend del Sprint 1 no estaba disponible, así que se construyó uno nuevo con IA y se declaró así. "
                "En el equipo solo había Java 25 y no había Maven, Docker ni MySQL; se descargó Maven a una carpeta del proyecto y las pruebas usan H2 en modo MySQL. "
-               "Failsafe tuvo que configurarse para que las pruebas de integración corrieran. Quedan dos puntos mitigados y uno pendiente: probar con MySQL real, publicar solo en modo demostración en Vercel, y las fotos propias. Tiempo: 1 minuto 30.")
+               "Failsafe tuvo que configurarse para que las pruebas de integración corrieran. Quedan tres puntos mitigados: probar con MySQL real, publicar solo en modo demostración en Vercel, y las fotos, que son temporales pero ya están alojadas en el proyecto. Tiempo: 1 minuto 30.")
     cortos = [["El backend del Sprint 1 no estaba disponible", "Se construyó un backend nuevo con IA, según el DDL y el plan", "Resuelto"],
               ["Solo Java 25: sin Maven, Docker ni MySQL", "Maven portátil en el proyecto; H2 en modo MySQL; release 21", "Resuelto"],
               ["Lombok no compilaba en JDK 23+", "annotationProcessorPaths en el compilador", "Resuelto"],
@@ -348,7 +349,7 @@ def main():
               ["Playwright sin su Chromium", "PW_CHANNEL=chrome; en CI se instala Chromium", "Resuelto"],
               ["Spring Boot no corre en Vercel", "La web se publica en modo demostración", "Mitigado"],
               ["Sin MySQL para probar el perfil mysql", "Perfil configurado; falta una corrida real", "Mitigado"],
-              ["Sin fotos propias del producto", "Fotos temporales hasta que el equipo aporte las suyas", "Pendiente"]]
+              ["Sin fotos propias del producto", "11 fotos temporales (Unsplash) alojadas en el proyecto; se reemplazan por archivos propios", "Mitigado"]]
     tabla(sl, 0.6, 1.5, 12.15, ["Bloqueo", "Solución", "Estado"], cortos, [4.6, 5.6, 1.2], 11.5, 0.54, color_col=(2, {"Resuelto": VERDE, "Mitigado": AMBAR, "Pendiente": ROJO}))
 
     # 14 cierre

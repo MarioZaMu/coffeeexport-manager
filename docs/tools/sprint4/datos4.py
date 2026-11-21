@@ -136,5 +136,5 @@ BLOQUEOS = [
     ("Playwright no encontraba su Chromium (versión distinta de la instalada).", "Las pruebas de interfaz fallaban al arrancar.", "Se usa el Chrome instalado con PW_CHANNEL=chrome; en el pipeline se instala Chromium.", "Resuelto"),
     ("Spring Boot no se ejecuta en Vercel.", "La web publicada no puede usar el backend.", "La web se publica en modo demostración (localStorage) y el sistema conectado corre local y en el pipeline.", "Mitigado"),
     ("No hay MySQL instalado.", "No se pudo probar contra MySQL real.", "Perfil mysql configurado y documentado; las pruebas usan H2 en modo MySQL. Falta una corrida con MySQL.", "Mitigado"),
-    ("No hay fotos propias del producto.", "La landing usa fotos temporales de Unsplash.", "El usuario aportará las fotos; se integran con un script.", "Pendiente"),
+    ("No hay fotos propias del producto.", "La landing y el catálogo necesitan fotografías.", "Se usan 11 fotos temporales de Unsplash (licencia libre) descargadas al proyecto, sin depender de un servidor externo. Se reemplazan por fotos propias copiando archivos con el mismo nombre.", "Mitigado"),
 ]

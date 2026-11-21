@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const RAIZ = path.join(__dirname, "..", "..");
-const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".woff2": "font/woff2", ".png": "image/png", ".json": "application/json" };
+const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".woff2": "font/woff2", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".json": "application/json" };
 
 function iniciar() {
   return new Promise(resolve => {

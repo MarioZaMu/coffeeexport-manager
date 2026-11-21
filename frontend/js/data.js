@@ -133,7 +133,8 @@ const Store = {
 
 /* Fotos temporales de Unsplash por código de producto (reemplazar por fotos propias).
    Compartidas por la landing y por el listado de productos del sistema. */
-const FOTO_PRODUCTO = {"CAF-ARA-01":"1447933601403-0c6688de566e", "CAF-ROB-01":"1513530176992-0cf39c4cbed4", "CAF-CAS-01":"1675306408031-a9aad9f23308",
-                       "CAC-GRA-01":"1507576164121-220762647800", "CAC-POL-01":"1602101025912-f4a36c505e28", "CAC-NIB-01":"1545567724-9b16e57c906d"};
-const FOTO_TIPO = {CAFE:"1447933601403-0c6688de566e", CACAO:"1545567724-9b16e57c906d"};
-const fotoProducto = (p, w = 600) => `https://images.unsplash.com/photo-${FOTO_PRODUCTO[p.codigo] || FOTO_TIPO[p.tipo]}?auto=format&fit=crop&q=70&w=${w}`;
+// Fotos temporales alojadas en el proyecto (frontend/img/productos). Para usar fotos propias basta con reemplazar los archivos con el mismo nombre.
+const FOTO_PRODUCTO = {"CAF-ARA-01":"cafe-arabica", "CAF-ROB-01":"cafe-robusta", "CAF-CAS-01":"cafe-castillo",
+                       "CAC-GRA-01":"cacao-grano", "CAC-POL-01":"cacao-polvo", "CAC-NIB-01":"cacao-nibs"};
+const FOTO_TIPO = {CAFE:"cafe-arabica", CACAO:"cacao-nibs"};
+const fotoProducto = (p, w = 600) => `img/productos/${FOTO_PRODUCTO[p.codigo] || FOTO_TIPO[p.tipo]}.jpg`;   // w se conserva por compatibilidad: ya no hay recorte en el servidor

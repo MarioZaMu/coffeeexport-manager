@@ -32,8 +32,10 @@ Abra `index.html` en el navegador (requiere internet para cargar las librerías 
 - `index.html`, `css/landing.css`, `js/landing.js`. Tipografía Geist autoalojada en `fonts/`. Iconos Phosphor (CDN) en la landing.
 - El catálogo lee los mismos productos, precios y stock del sistema (`localStorage`), con filtro por tipo, detalle y estados de carga.
 - Movimiento solo con IntersectionObserver, CSS y Web Animations; respeta `prefers-reduced-motion`. Tema claro y oscuro (sigue al sistema, con botón).
-- **Fotos temporales de Unsplash** (licencia Unsplash, enlazadas desde images.unsplash.com). Para producción, reemplazarlas por fotos propias:
-  hero, 6 productos (mapa `FOTO` en `js/landing.js`), proceso, cifras, normativa y cierre.
+- **Fotos temporales de Unsplash, alojadas en el proyecto** (`img/` y `img/productos/`, licencia Unsplash). Ya no se cargan desde un servidor externo.
+  Para usar fotos propias, reemplazar los archivos con el mismo nombre: `hero`, `proceso`, `cifras`, `normativa`, `cierre` y los 6 productos
+  (`cafe-arabica`, `cafe-robusta`, `cafe-castillo`, `cacao-grano`, `cacao-polvo`, `cacao-nibs`). El mapa producto-foto está en `FOTO_PRODUCTO` de `js/data.js`.
+  El script `docs/tools/sprint4/fotos_temporales.py` las vuelve a descargar y optimizar (JPEG, 80 %).
 
 ## Sistema (app.html) con el mismo lenguaje visual
 - Paleta Forest, tipografía Geist, tema claro y oscuro compartido con la landing (botón en la barra superior; cambia también las gráficas).

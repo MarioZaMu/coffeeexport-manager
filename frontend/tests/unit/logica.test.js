@@ -217,7 +217,7 @@ describe("Fechas, permisos y catálogo", () => {
     assert.deepEqual(plano(Object.keys(A.ESTADOS_EXP)).sort(), ["BORRADOR", "CANCELADA", "ENTREGADA", "EN_PREPARACION", "EN_TRANSITO"]);
   });
   test("PU-30 [HU-03][RF-10] fotoProducto() usa la foto por código y una de respaldo por tipo", () => {
-    assert.match(A.fotoProducto({ codigo: "CAF-ARA-01", tipo: "CAFE" }, 300), /photo-1447933601403-0c6688de566e.*w=300/);
-    assert.match(A.fotoProducto({ codigo: "NUEVO-01", tipo: "CACAO" }), /photo-1545567724-9b16e57c906d.*w=600/);
+    assert.equal(A.fotoProducto({ codigo: "CAF-ARA-01", tipo: "CAFE" }, 300), "img/productos/cafe-arabica.jpg");
+    assert.equal(A.fotoProducto({ codigo: "NUEVO-01", tipo: "CACAO" }), "img/productos/cacao-nibs.jpg");
   });
 });
