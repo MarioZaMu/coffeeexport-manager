@@ -1,0 +1,13 @@
+﻿Summary,Issue Type,Description,Labels
+"Construir el backend Spring Boot con API REST, seguridad y JPA",Story,"Entidades de las 13 tablas, servicios, controladores, RBAC y sesión de 30 minutos.",backend
+Pruebas unitarias del backend con JUnit 5 y Mockito,Story,47 pruebas unitarias y de repositorio con los IDs QA del plan.,pruebas
+Pruebas de integración con MockMvc y matriz de permisos,Story,92 pruebas *IT incluida la matriz rol por ruta.,pruebas
+Conectar la interfaz con la API (api.js),Story,Modo conectado con ?api=URL y modo demostración.,frontend
+Pruebas de sistema con Playwright contra el backend real,Story,PS-01 a PS-10.,pruebas
+Pipeline de GitHub Actions con ejecución semanal,Story,"Backend y frontend, artefactos y cobertura JaCoCo.",ci
+Llenar el plan de pruebas del Sprint 2 con resultados reales,Task,"44 casos con resultado, fecha y observaciones.",documentacion
+Documento de pruebas del Sprint 4 (Word),Task,"Unitarias, integración, automatizadas, scripts y resultados.",documentacion
+Presentación del Sprint 4,Task,"Jira, uso de IA, quién trabajó en qué, bloqueos y soluciones.",documentacion
+Fotos propias del producto para la landing y el catálogo,Task,11 imágenes según la lista del equipo.,frontend
+Publicar la interfaz en Vercel (modo demostración),Task,Despliegue estático de frontend/.,despliegue
+Probar el perfil MySQL con una base real,Task,Pendiente: no hay MySQL instalado.,pruebas

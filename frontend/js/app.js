@@ -18,16 +18,21 @@ function restoreSession() {
 function showLogin(msg) {
   killCharts(); Session.user = null; $("#app").hidden = true; $("#login-view").hidden = false;
   $("#hero-logo").innerHTML = logoSVG(96, "#f0a830", "#123b30");
-  $("#demo-users").innerHTML = Store.db.usuarios.filter(u => u.activo).map(u => `<button type="button" data-u="${esc(u.email)}">${esc(ROLES[u.rol].nombre)}</button>`).join("");
+  const cuentas = Api.on ? DEMO_CUENTAS : Store.db.usuarios.filter(u => u.activo).map(u => [u.email, u.rol]);
+  $("#demo-users").innerHTML = cuentas.map(([email, rol]) => `<button type="button" data-u="${esc(email)}">${esc(ROLES[rol].nombre)}</button>`).join("");
   $$("#demo-users [data-u]").forEach(b => b.onclick = () => { $("#login-email").value = b.dataset.u; $("#login-pass").value = "Demo2026*"; $("#login-pass").focus(); });
   const err = $("#login-error"); err.hidden = !msg; err.textContent = msg || "";
   history.replaceState(null, "", location.pathname);
 }
-function doLogin(e) {
+async function doLogin(e) {
   e.preventDefault();
   const email = $("#login-email").value.trim().toLowerCase(), pass = $("#login-pass").value, err = $("#login-error");
   const fail = m => { err.hidden = false; err.textContent = m; };
   if (!email || !pass) return fail("Ingrese su correo y contraseña.");
+  if (Api.on) {   // modo conectado: la validación (BCrypt, usuario activo) la hace el servidor
+    try { Session.user = await Api.login(email, pass); await Api.refresh(); } catch (er) { Session.user = null; return fail(er.message); }
+    Session.last = Date.now(); $("#login-pass").value = ""; err.hidden = true; return startApp(true);
+  }
   const u = Store.db.usuarios.find(x => x.email.toLowerCase() === email);
   if (!u || u.password !== pass) return fail("Credenciales incorrectas");            // mensaje genérico (UC-01 3a)
   if (!u.activo) return fail("Su usuario está inactivo. Contacte al administrador.");
@@ -42,6 +47,7 @@ function startApp(fresh) {
   $("#u-name").textContent = u.nombre.split(" ")[0] === "Administrador" ? "Admin" : u.nombre; $("#u-role").textContent = ROLES[u.rol].nombre; $("#u-mail").textContent = u.email;
   $("#u-avatar").textContent = u.nombre.split(" ").map(x => x[0]).slice(0, 2).join("").toUpperCase();
   $("#nav").innerHTML = MODULOS.filter(m => can(m.id)).map(m => `<li><a href="#${m.id}" data-m="${m.id}"><i class="bi ${m.icon}"></i><span>${m.label}</span></a></li>`).join("");
+  $(".side-foot").innerHTML = Api.on ? `Conectado al servidor<br>${esc(new URL(Api.base).host)}` : "Modo demostración<br>Datos en este navegador";
   refreshBell();
   if (fresh || !location.hash) location.hash = "#" + HOME[u.rol]; else route();
 }
@@ -57,7 +63,7 @@ function route() {
   Views[hash](); window.scrollTo(0, 0); const v = $("#view"); v.focus({preventScroll:true});
   v.classList.add("enter"); countUp(v); clearTimeout(route._t); route._t = setTimeout(() => v.classList.remove("enter"), 1200);   // la entrada solo anima al cambiar de vista
 }
-function logout(msg) { clearSession(); showLogin(msg); }
+function logout(msg) { if (Api.on && Session.user) Api.req("POST", "/api/auth/logout").catch(() => {}); clearSession(); showLogin(msg); }
 
 /* ---------------- Sidebar móvil ---------------- */
 const closeSidebar = () => { $("#sidebar").classList.remove("open"); $("#backdrop").classList.remove("show"); };
@@ -88,7 +94,7 @@ function initSearch() {
 
 /* ---------------- Arranque ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  Store.load();
+  Api.init(); Store.load();
   $("#login-form").addEventListener("submit", doLogin);
   $("#toggle-pass").onclick = () => { const p = $("#login-pass"), show = p.type === "password"; p.type = show ? "text" : "password"; $("#toggle-pass i").className = `bi bi-eye${show ? "-slash" : ""}`; };
   $("#forgot").onclick = e => { e.preventDefault(); toast("Contacte al administrador para restablecer su contraseña.", "info"); };
@@ -103,5 +109,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("hashchange", route);
   ["click", "keydown", "mousemove", "touchstart"].forEach(ev => document.addEventListener(ev, () => { Session.last = Date.now(); }, {passive:true}));
   setInterval(() => { if (Session.user && Date.now() - Session.last > IDLE_MS) logout("Su sesión expiró por inactividad. Inicie sesión de nuevo."); }, 30000);
-  if (restoreSession()) { Session.last = Date.now(); startApp(false); } else showLogin();
+  if (Api.on) {   // ¿sigue viva la sesión del servidor?
+    Api.me().then(async u => { Session.user = u; Session.last = Date.now(); await Api.refresh(); startApp(false); })
+      .catch(er => showLogin(er.status === 401 ? "" : er.message));
+  } else if (restoreSession()) { Session.last = Date.now(); startApp(false); } else showLogin();
 });
