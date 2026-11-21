@@ -115,6 +115,8 @@ EJECUCIONES = [
     ("4", "Sistema (Playwright contra el backend real)", "10", "0", "10", "Defecto real: el navegador no podía llamar a la API (faltaban las cabeceras CORS por el nombre del bean). Las pruebas MockMvc no lo detectan porque no envían Origin."),
     ("5", "Backend: completo con CorsIT", "139", "139", "0", "Bean renombrado a corsConfigurationSource y 2 pruebas nuevas de CORS."),
     ("6", "Frontend completo: unitarias, integración y sistema", "68", "68", "0", "30 unitarias, 28 de integración (modo demostración) y 10 de sistema contra el backend real; 133 s en total."),
+    ("7", "Backend completo contra MySQL 8.4.10 real", "139", "139", "0", "Primera corrida con 5 errores: RepositoriosTest usaba H2 con el dialecto MySQL y el build se detenía antes de las pruebas de integración. Corregido; Hibernate creó las 13 tablas."),
+    ("8", "Frontend completo con la interfaz rediseñada", "68", "68", "0", "Dashboard nuevo (gráficas, embudo de estados, stock frente al mínimo, panel de atención), tablas en tarjetas en móvil y estados de error."),
 ]
 
 DEFECTOS = [
@@ -135,6 +137,6 @@ BLOQUEOS = [
     ("El backend no enviaba CORS y la web no podía llamarlo (D-07).", "La interfaz conectada fallaba entera.", "Se corrigió el nombre del bean y se agregaron pruebas de CORS.", "Resuelto"),
     ("Playwright no encontraba su Chromium (versión distinta de la instalada).", "Las pruebas de interfaz fallaban al arrancar.", "Se usa el Chrome instalado con PW_CHANNEL=chrome; en el pipeline se instala Chromium.", "Resuelto"),
     ("Spring Boot no se ejecuta en Vercel.", "La web publicada no puede usar el backend.", "La web se publica en modo demostración (localStorage) y el sistema conectado corre local y en el pipeline.", "Mitigado"),
-    ("No hay MySQL instalado.", "No se pudo probar contra MySQL real.", "Perfil mysql configurado y documentado; las pruebas usan H2 en modo MySQL. Falta una corrida con MySQL.", "Mitigado"),
+    ("No hay MySQL instalado.", "No se podía probar contra una base real.", "Se descargó MySQL 8.4.10 portable a tools/ (fuera de Git) y se corrió la suite con el perfil mysql: 139 de 139. La corrida destapó que RepositoriosTest forzaba H2 con el dialecto MySQL; se fijó con @ActiveProfiles.", "Resuelto"),
     ("No hay fotos propias del producto.", "La landing y el catálogo necesitan fotografías.", "Se usan 11 fotos temporales de Unsplash (licencia libre) descargadas al proyecto, sin depender de un servidor externo. Se reemplazan por fotos propias copiando archivos con el mismo nombre.", "Mitigado"),
 ]

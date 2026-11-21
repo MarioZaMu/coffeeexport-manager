@@ -118,11 +118,23 @@ const isDark = () => document.documentElement.dataset.theme === "dark";
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const palette = () => isDark() ? ["#4fb58f","#f0a830","#6fa8dc","#c19a6b","#93c47d","#e0795f","#9fb0a8"] : ["#1b5645","#d98e04","#3b7fb8","#7a5a3e","#6aa84f","#c4553d","#5d6b66"];
 const chartAccent = () => cssv("--cem-chart"), chartGrid = () => cssv("--cem-grid");
+const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 function mkChart(id, cfg) {
-  const el = document.getElementById(id); if (!el || typeof Chart === "undefined") return;
+  const el = document.getElementById(id); if (!el) return;
+  if (typeof Chart === "undefined") {   // estado de error: la librería de gráficas no cargó (sin red o bloqueada)
+    el.parentElement.innerHTML = `<div class="empty"><i class="bi bi-wifi-off"></i>No se pudo cargar la gráfica.<div><button class="btn btn-sm btn-light mt-2" type="button" data-retry>Reintentar</button></div></div>`;
+    const b = el.parentElement.querySelector("[data-retry]"); if (b) b.onclick = () => location.reload(); return;
+  }
   Chart.defaults.color = cssv("--cem-muted"); Chart.defaults.borderColor = cssv("--cem-line"); Chart.defaults.font.family = '"Geist", system-ui, sans-serif';
+  cfg.options = cfg.options || {};
+  cfg.options.animation = reducedMotion() ? false : {duration:1000, easing:"easeOutQuart", ...(cfg.options.animation || {})};
   const c = new Chart(el, cfg); _charts.push(c); return c;
 }
+
+/* Estado de carga: esqueleto con la forma de la vista (se usa mientras llegan los datos del servidor) */
+const skeleton = (filas = 4) => `<div class="skel-wrap" aria-busy="true" aria-label="Cargando"><div class="skel skel-title"></div><div class="skel skel-sub"></div><div class="row g-3 mt-1">${[1, 2, 3, 4].map(() => `<div class="col-6 col-xl-3"><div class="skel skel-card"></div></div>`).join("")}</div>${Array.from({length:filas}, () => `<div class="skel skel-row"></div>`).join("")}</div>`;
+/* Estado de error con acción de reintento */
+const errorState = (msg, retryId = "retry") => `<div class="card-cem"><div class="empty"><i class="bi bi-exclamation-octagon text-danger"></i><div class="fw-semibold mb-1">No se pudo cargar esta vista</div><div class="small mb-3">${esc(msg)}</div><button class="btn btn-cem btn-sm" type="button" id="${retryId}"><i class="bi bi-arrow-clockwise me-1"></i>Reintentar</button></div></div>`;
 
 /* Valor de KPI que cuenta desde cero al aparecer (feedback de carga de datos) */
 const kv = (v, fmt = "n") => `<span data-count="${v}" data-fmt="${fmt}">${fmt === "usd0" ? usd0(v) : nf(v)}</span>`;

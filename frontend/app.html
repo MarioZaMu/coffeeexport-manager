@@ -15,6 +15,7 @@
 <link href="css/styles.css" rel="stylesheet">
 </head>
 <body>
+<a class="skip-link" href="#view">Saltar al contenido</a>
 
 <!-- ============ LOGIN ============ -->
 <section id="login-view" hidden>
@@ -63,6 +64,7 @@
   </aside>
   <div class="sidebar-backdrop" id="backdrop"></div>
   <div class="main">
+    <div class="net-banner" id="net-banner" role="status" hidden><i class="bi bi-wifi-off me-2"></i>Sin conexión con el servidor. Los cambios no se guardarán hasta que vuelva la red.</div>
     <header class="topbar">
       <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú"><i class="bi bi-list"></i></button>
       <div class="search">
@@ -90,7 +92,7 @@
         </div>
       </div>
     </header>
-    <main class="content" id="view" tabindex="-1"></main>
+    <main class="content" id="view" tabindex="-1" aria-label="Contenido principal"></main>
   </div>
 </div>
 

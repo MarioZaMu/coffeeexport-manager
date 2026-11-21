@@ -340,7 +340,7 @@ def main():
     sl = nueva(prs, "Bloqueos encontrados y soluciones", "Qué nos frenó y cómo se resolvió",
                "Estos fueron los bloqueos principales. El más grande: el backend del Sprint 1 no estaba disponible, así que se construyó uno nuevo con IA y se declaró así. "
                "En el equipo solo había Java 25 y no había Maven, Docker ni MySQL; se descargó Maven a una carpeta del proyecto y las pruebas usan H2 en modo MySQL. "
-               "Failsafe tuvo que configurarse para que las pruebas de integración corrieran. Quedan tres puntos mitigados: probar con MySQL real, publicar solo en modo demostración en Vercel, y las fotos, que son temporales pero ya están alojadas en el proyecto. Tiempo: 1 minuto 30.")
+               "Failsafe tuvo que configurarse para que las pruebas de integración corrieran. Quedan dos puntos mitigados: publicar solo en modo demostración en Vercel, y las fotos, que son temporales pero ya están alojadas en el proyecto. La suite del backend ya se verificó en MySQL real. Tiempo: 1 minuto 30.")
     cortos = [["El backend del Sprint 1 no estaba disponible", "Se construyó un backend nuevo con IA, según el DDL y el plan", "Resuelto"],
               ["Solo Java 25: sin Maven, Docker ni MySQL", "Maven portátil en el proyecto; H2 en modo MySQL; release 21", "Resuelto"],
               ["Lombok no compilaba en JDK 23+", "annotationProcessorPaths en el compilador", "Resuelto"],
@@ -348,21 +348,21 @@ def main():
               ["CORS bloqueaba la web (D-07)", "Bean renombrado y CorsIT", "Resuelto"],
               ["Playwright sin su Chromium", "PW_CHANNEL=chrome; en CI se instala Chromium", "Resuelto"],
               ["Spring Boot no corre en Vercel", "La web se publica en modo demostración", "Mitigado"],
-              ["Sin MySQL para probar el perfil mysql", "Perfil configurado; falta una corrida real", "Mitigado"],
+              ["Sin MySQL para probar el perfil mysql", "MySQL 8.4.10 portable en tools/; suite completa (139) aprobada en MySQL real", "Resuelto"],
               ["Sin fotos propias del producto", "11 fotos temporales (Unsplash) alojadas en el proyecto; se reemplazan por archivos propios", "Mitigado"]]
     tabla(sl, 0.6, 1.5, 12.15, ["Bloqueo", "Solución", "Estado"], cortos, [4.6, 5.6, 1.2], 11.5, 0.54, color_col=(2, {"Resuelto": VERDE, "Mitigado": AMBAR, "Pendiente": ROJO}))
 
     # 14 cierre
     sl = nueva(prs, "Conclusiones y próximos pasos", "Calidad medible y repetible",
                f"Cerramos con las conclusiones. Se automatizaron {total} pruebas de tres niveles, todas aprobadas, con {tot_cob[2]:.1f} % de cobertura en el backend, y los 44 casos del plan del Sprint 2 tienen resultado real. "
-               "Los defectos se corrigieron y quedaron cubiertos. El pipeline detecta regresiones solo. Los próximos pasos son probar con MySQL real, reemplazar las fotos temporales y mantener el tablero de Jira al día. Tiempo: 1 minuto.")
+               "Los defectos se corrigieron y quedaron cubiertos. El pipeline detecta regresiones solo. Los próximos pasos son medir Lighthouse y accesibilidad, reemplazar las fotos temporales y mantener el tablero de Jira al día. Tiempo: 1 minuto.")
     rect(sl, 0.6, 1.6, 6.0, 5.2, CARD)
     texto(sl, 0.8, 1.7, 5.6, 0.4, "Conclusiones", 18, VERDE, True)
     viñetas(sl, 0.8, 2.25, 5.6, 4.5, [f"**{total} pruebas** automáticas en tres niveles, **{ok} aprobadas**", f"**{tot_cob[2]:.1f} %** de cobertura de líneas en el backend", "Los **44 casos** del plan del Sprint 2, ejecutados con evidencia",
                                       "**7 defectos** reales hallados, corregidos y con prueba de regresión", "El pipeline repite todo en cada cambio y cada lunes"], 14, sep=8)
     rect(sl, 6.85, 1.6, 5.9, 5.2, CARD)
     texto(sl, 7.05, 1.7, 5.5, 0.4, "Próximos pasos", 18, AMBAR, True)
-    viñetas(sl, 7.05, 2.25, 5.5, 4.5, ["Ejecutar la suite contra **MySQL real** (perfil mysql)", "Reemplazar las fotos temporales por las fotos propias", "Publicar la interfaz en Vercel (modo demostración)",
+    viñetas(sl, 7.05, 2.25, 5.5, 4.5, ["Medir **Lighthouse** y accesibilidad con axe en la interfaz", "Reemplazar las fotos temporales por las fotos propias", "Publicar la interfaz en Vercel (modo demostración)",
                                        "Mantener el tablero de Jira al día", "Ampliar pruebas de carga y de accesibilidad"], 14, sep=8)
 
     os.makedirs(os.path.dirname(SALIDA), exist_ok=True)

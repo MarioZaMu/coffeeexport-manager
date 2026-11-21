@@ -275,7 +275,7 @@ def main():
     titulo(doc, "Entorno", 2)
     tabla(doc, ["Componente", "Versión / detalle"], [
         ["Backend", "Spring Boot 3.5.16, Java 21 (compilado con release 21 sobre JDK 25), Maven 3.9.16, Spring Security, JPA/Hibernate, Lombok"],
-        ["Base de datos de pruebas", "H2 en modo MySQL (sin instalar nada); perfil mysql disponible para producción"],
+        ["Base de datos de pruebas", "H2 en modo MySQL (sin instalar nada); perfil mysql verificado con MySQL 8.4.10 portable (139 pruebas, 13 tablas)"],
         ["Pruebas del backend", "JUnit 5, Mockito, AssertJ, MockMvc, Spring Security Test, JaCoCo, Surefire (unitarias) y Failsafe (*IT)"],
         ["Pruebas de la interfaz", "Node 22 con node:test, Playwright (playwright-core) sobre Chrome"],
         ["Integración continua", "GitHub Actions (ubuntu-latest, Temurin 21, Node 22), con ejecución semanal programada"],
@@ -447,7 +447,7 @@ def main():
               "Los 44 casos del plan del Sprint 2 pasaron de planificados a ejecutados con evidencia.",
               "Las pruebas encontraron 7 defectos reales; cada uno quedó corregido y cubierto por una prueba de regresión.",
               "El pipeline repite todo automáticamente en cada cambio y cada lunes, por lo que una regresión se detecta sin intervención humana.",
-              "**Pendiente:** correr la suite con MySQL real (perfil mysql), reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo, y publicar la interfaz en Vercel en modo demostración."):
+              "Se verificó además la suite del backend contra **MySQL 8.4.10 real**: 139 de 139. **Pendiente:** medir Lighthouse y accesibilidad, reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo, y publicar la interfaz en Vercel en modo demostración."):
         vineta(doc, s)
 
     # ---- anexos

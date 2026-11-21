@@ -30,7 +30,9 @@ async function doLogin(e) {
   const fail = m => { err.hidden = false; err.textContent = m; };
   if (!email || !pass) return fail("Ingrese su correo y contraseña.");
   if (Api.on) {   // modo conectado: la validación (BCrypt, usuario activo) la hace el servidor
+    const btn = $("#login-form [type=submit]"), txt = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Ingresando…`;
     try { Session.user = await Api.login(email, pass); await Api.refresh(); } catch (er) { Session.user = null; return fail(er.message); }
+    finally { btn.disabled = false; btn.innerHTML = txt; }
     Session.last = Date.now(); $("#login-pass").value = ""; err.hidden = true; return startApp(true);
   }
   const u = Store.db.usuarios.find(x => x.email.toLowerCase() === email);
@@ -58,10 +60,31 @@ function route() {
   const m = MODULOS.find(x => x.id === mod);
   if (!m || !Views[hash]) { location.hash = "#" + HOME[Session.user.rol]; return; }
   if (!can(mod)) { toast("Acceso denegado: su rol no tiene permiso para este módulo.", "danger"); location.hash = "#" + HOME[Session.user.rol]; return; }   // RNF-03
-  $$("#nav a").forEach(a => a.classList.toggle("active", a.dataset.m === mod));
+  $$("#nav a").forEach(a => { const on = a.dataset.m === mod; a.classList.toggle("active", on); if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   document.title = `${m.label} · CoffeeExport Manager`;
-  Views[hash](); window.scrollTo(0, 0); const v = $("#view"); v.focus({preventScroll:true});
+  const v = $("#view");
+  try { Views[hash](); }
+  catch (er) { console.warn("Error al dibujar la vista", hash, er); v.innerHTML = pageHead(m.label, "") + errorState(er.message || "Error inesperado"); $("#retry").onclick = () => route(); }
+  window.scrollTo(0, 0); v.focus({preventScroll:true}); stackTables(v);
   v.classList.add("enter"); countUp(v); clearTimeout(route._t); route._t = setTimeout(() => v.classList.remove("enter"), 1200);   // la entrada solo anima al cambiar de vista
+}
+/* En pantallas pequeñas las tablas pasan a tarjetas: cada celda toma como etiqueta el encabezado de su columna (CSS en styles.css) */
+function stackTables(root = document) {
+  $$("table.table-cem", root).forEach(t => {
+    const h = $$("thead th", t).map(x => x.textContent.trim());
+    $$("tbody tr", t).forEach(tr => [...tr.children].forEach((td, i) => { if (h[i] && !td.dataset.label) td.dataset.label = h[i]; }));
+    t.classList.add("stack");
+  });
+}
+function watchTables() {
+  const v = $("#view"); let pend = false;
+  new MutationObserver(() => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; stackTables(v); }); }).observe(v, {childList:true, subtree:true});
+}
+/* Estado de conexión (solo modo conectado): avisa cuando el navegador pierde la red */
+function watchNet() {
+  const b = $("#net-banner"); if (!b) return;
+  const paint = () => { b.hidden = !(Api.on && navigator.onLine === false); };
+  addEventListener("offline", paint); addEventListener("online", () => { paint(); if (Api.on && Session.user) toast("Conexión restablecida", "success"); });
 }
 function logout(msg) { if (Api.on && Session.user) Api.req("POST", "/api/auth/logout").catch(() => {}); clearSession(); showLogin(msg); }
 
@@ -101,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#logout").onclick = e => { e.preventDefault(); logout(); };
   $("#menu-toggle").onclick = () => { $("#sidebar").classList.add("open"); $("#backdrop").classList.add("show"); };
   $("#backdrop").onclick = closeSidebar;
-  initSearch();
+  initSearch(); watchTables(); watchNet();
   const paintTheme = () => { $("#theme-ic").className = "bi " + (isDark() ? "bi-sun" : "bi-moon-stars"); };
   paintTheme();
   $("#theme").onclick = () => { const t = isDark() ? "light" : "dark"; document.documentElement.dataset.theme = t; document.documentElement.dataset.bsTheme = t;

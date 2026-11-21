@@ -970,9 +970,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
 
 /** Repositorios contra una base H2 real: consultas derivadas y consultas JPQL parametrizadas. */
 @DataJpaTest
+@ActiveProfiles("h2")   // fija H2 aunque se ejecute la suite con el perfil mysql
 class RepositoriosTest {
     @Autowired TestEntityManager em;
     @Autowired ClienteRepository clientes;

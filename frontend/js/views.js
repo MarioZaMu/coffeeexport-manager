@@ -23,40 +23,111 @@ const prodName = id => (byId(DBx().productos, id) || {}).nombre || "-";
 const expOf = id => byId(DBx().exportaciones, id);
 
 /* ======================================================= DASHBOARD */
+const MESES_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+const ultimosMeses = (n, now = new Date()) => Array.from({length:n}, (_, i) => { const f = new Date(now.getFullYear(), now.getMonth() - (n - 1 - i), 1); return {key:iso(f).slice(0, 7), label:MESES_ES[f.getMonth()]}; });
+const hexA = (hex, a) => /^#[0-9a-f]{6}$/i.test(hex) ? `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${a})` : hex;
+const degradado = (ctx, color, a0 = .34) => { const {chart} = ctx, area = chart.chartArea; if (!area) return "transparent"; const g = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom); g.addColorStop(0, hexA(color, a0)); g.addColorStop(1, hexA(color, 0)); return g; };
+
+/* Minigráfica de tendencia en SVG (datos reales de los últimos meses); la línea se dibuja al aparecer */
+function spark(vals, tipo = "line") {
+  const W = 120, H = 34, pad = 3, n = vals.length, max = Math.max(...vals, 1);
+  if (tipo === "bars") {
+    const bw = (W - pad * 2) / n;
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${vals.map((v, i) => { const h = Math.max(2, v / max * (H - pad * 2)); return `<rect x="${(pad + i * bw + 1.5).toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${(bw - 3).toFixed(1)}" height="${h.toFixed(1)}" rx="2" style="--i:${i}"/>`; }).join("")}</svg>`;
+  }
+  const pts = vals.map((v, i) => [pad + i * (W - pad * 2) / Math.max(1, n - 1), H - pad - v / max * (H - pad * 2)]);
+  const d = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" "), last = pts[pts.length - 1];
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2.6" fill="currentColor"/></svg>`;
+}
+
+/* Embudo de estados: una sola barra segmentada + leyenda con cantidad y porcentaje */
+function embudoEstados(exps) {
+  const orden = ["BORRADOR", "EN_PREPARACION", "EN_TRANSITO", "ENTREGADA", "CANCELADA"], tot = exps.length;
+  const cnt = orden.map(k => exps.filter(e => e.estado === k).length);
+  if (!tot) return emptyState("Aún no hay exportaciones registradas", "bi-truck");
+  const barra = orden.map((k, i) => cnt[i] ? `<span class="seg ${ESTADOS_EXP[k][1]}" style="flex:${cnt[i]};--i:${i}" title="${esc(ESTADOS_EXP[k][0])}: ${cnt[i]}"></span>` : "").join("");
+  const leyenda = orden.map((k, i) => `<li><span class="dotc ${ESTADOS_EXP[k][1]}" aria-hidden="true"></span><span class="n">${esc(ESTADOS_EXP[k][0])}</span><b>${cnt[i]}</b><small>${Math.round(cnt[i] / tot * 100)} %</small></li>`).join("");
+  return `<div class="pipe" role="img" aria-label="Exportaciones por estado">${barra}</div><ul class="legend-list">${leyenda}</ul>`;
+}
+
+/* Stock de cada producto frente a su mínimo: la marca ámbar es el mínimo; en rojo si está por debajo */
+function stockFrenteMinimo() {
+  const filas = DBx().productos.map(p => { const inv = DBx().inventario.filter(i => i.producto_id === p.id); return {p, s:stockProducto(p.id), min:inv.reduce((a, i) => a + i.min, 0)}; }).filter(r => r.s > 0 || r.min > 0).sort((a, b) => b.s - a.s);
+  if (!filas.length) return emptyState("Sin inventario registrado", "bi-boxes");
+  const escala = Math.max(...filas.map(r => Math.max(r.s, r.min * 1.3)), 1);
+  return `<ul class="stk">${filas.map((r, i) => { const bajo = r.min > 0 && r.s < r.min; return `<li class="${bajo ? "low" : ""}" style="--i:${i}"><div class="d-flex justify-content-between small"><span class="fw-semibold">${esc(r.p.nombre)}</span><span class="text-muted">${nf(r.s)} kg${r.min ? ` · mín. ${nf(r.min)}` : ""}</span></div><div class="track" role="img" aria-label="${esc(r.p.nombre)}: ${nf(r.s)} kg${r.min ? `, mínimo ${nf(r.min)} kg` : ""}"><span class="fill" style="width:${(r.s / escala * 100).toFixed(1)}%"></span>${r.min ? `<span class="mark" style="left:${(r.min / escala * 100).toFixed(1)}%"></span>` : ""}</div></li>`; }).join("")}</ul>`;
+}
+
+/* Panel de atención: lo que requiere una acción hoy, con enlace directo al módulo */
+function panelAtencion() {
+  const d = DBx(), it = [];
+  if (can("inventario")) alertasStock().forEach(a => it.push({ic:"bi-exclamation-triangle", tono:"warn", t:`Stock bajo: ${a.p.nombre}`, s:`${nf(a.stock)} kg disponibles, mínimo ${nf(a.min)} kg`, h:"#inventario"}));
+  if (can("exportaciones") && can("documentos")) d.exportaciones.filter(e => e.estado === "EN_PREPARACION" && docsFaltantes(e.id).length).slice(0, 3).forEach(e => it.push({ic:"bi-file-earmark-x", tono:"bad", t:`${e.codigo}: documentación incompleta`, s:`Faltan ${docsFaltantes(e.id).length} documento(s) obligatorio(s)`, h:"#documentos"}));
+  if (can("documentos")) { const p = d.documentos.filter(x => x.estado === "PENDIENTE").length; if (p) it.push({ic:"bi-file-earmark-check", tono:"info", t:`${p} documento(s) por validar`, s:"Revise y valide los archivos cargados", h:"#documentos"}); }
+  if (can("pagos")) { const p = d.pagos.filter(x => x.estado === "PENDIENTE").length; if (p) it.push({ic:"bi-credit-card", tono:"ok", t:`${p} pago(s) por confirmar`, s:"Concilie los pagos pendientes", h:"#pagos"}); }
+  if (!it.length) return `<div class="empty"><i class="bi bi-check2-circle text-success"></i>Todo al día. No hay pendientes por atender.</div>`;
+  return `<ul class="att">${it.map((x, i) => `<li style="--i:${i}"><a href="${x.h}"><span class="ai ${x.tono}"><i class="bi ${x.ic}"></i></span><span class="at"><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><i class="bi bi-chevron-right go"></i></a></li>`).join("")}</ul>`;
+}
+
 Views.dashboard = () => {
   const d = DBx(), now = new Date(), ym = x => String(x).slice(0, 7);
   const mes = iso(now).slice(0, 7), prev = iso(new Date(now.getFullYear(), now.getMonth() - 1, 15)).slice(0, 7);
   const valid = d.exportaciones.filter(e => !["CANCELADA", "BORRADOR"].includes(e.estado));
   const ventas = m => valid.filter(e => ym(e.fecha_envio) === m).reduce((a, e) => a + totalExp(e), 0);
   const cnt = m => d.exportaciones.filter(e => ym(e.fecha_envio) === m).length;
+  const meses = ultimosMeses(6), serieExp = meses.map(m => cnt(m.key)), serieVentas = meses.map(m => ventas(m.key));
+  const serieCli = meses.map(m => new Set(d.exportaciones.filter(e => ym(e.fecha_envio) === m.key).map(e => e.cliente_id)).size);
+  const stockPorProd = d.productos.map(p => stockProducto(p.id)).filter(v => v > 0);
   const delta = (a, b) => { if (!b) return `<span class="delta flat">- vs mes anterior</span>`; const p = Math.round((a - b) / b * 100); return `<span class="delta ${p >= 0 ? "up" : "down"}"><i class="bi bi-arrow-${p >= 0 ? "up" : "down"}-short"></i>${Math.abs(p)}% vs. mes anterior</span>`; };
   const act = d.clientes.filter(c => c.activo).length;
-  const kpi = (ico, cls, lbl, val, dl) => `<div class="col-6 col-xl-3"><div class="card-cem kpi h-100"><div class="ico ${cls}"><i class="bi ${ico}"></i></div><div><div class="lbl">${lbl}</div><div class="val">${val}</div>${dl}</div></div></div>`;
+  const kpi = (ico, cls, lbl, val, dl, sp) => `<div class="col-6 col-xl-3"><div class="card-cem kpi h-100"><div class="ico ${cls}"><i class="bi ${ico}"></i></div><div class="kbody"><div class="lbl">${lbl}</div><div class="val">${val}</div>${dl}${sp}</div></div></div>`;
   const ult = [...d.exportaciones].sort((a, b) => b.fecha_envio.localeCompare(a.fecha_envio)).slice(0, 5);
-  $("#view").innerHTML = pageHead("Dashboard", "Resumen general del sistema") + `
-  <div class="row g-3 mb-3">
-    ${kpi("bi-truck", "", "Total Exportaciones", kv(d.exportaciones.length), delta(cnt(mes), cnt(prev)))}
-    ${kpi("bi-people", "blue", "Clientes Activos", kv(act), `<span class="delta flat">${d.clientes.length} registrados</span>`)}
-    ${kpi("bi-boxes", "coffee", "Inventario Disponible", `${kv(totalInventario())} <small>kg</small>`, `<span class="delta ${alertasStock().length ? "down" : "up"}">${alertasStock().length ? alertasStock().length + " producto(s) bajo mínimo" : "Stock saludable"}</span>`)}
-    ${kpi("bi-currency-dollar", "amber", "Ventas del mes", `${kv(ventas(mes), "usd0")} <small>USD</small>`, delta(ventas(mes), ventas(prev)))}
-  </div>
-  <div class="row g-3 mb-3">
-    <div class="col-lg-7"><div class="card-cem h-100"><div class="card-h">Exportaciones por país</div><div class="card-b"><div class="chart-box"><canvas id="ch-pais" aria-label="Exportaciones por país" role="img"></canvas></div></div></div></div>
-    <div class="col-lg-5"><div class="card-cem h-100"><div class="card-h">Productos más vendidos</div><div class="card-b"><div class="chart-box"><canvas id="ch-prod" aria-label="Productos más vendidos" role="img"></canvas></div></div></div></div>
-  </div>
-  <div class="card-cem"><div class="card-h">Últimas exportaciones <a href="#exportaciones" class="small fw-normal">Ver todas</a></div>
-    <div class="table-responsive"><table class="table table-cem"><thead><tr><th>ID</th><th>Cliente</th><th>País destino</th><th>Producto</th><th>Fecha de envío</th><th>Estado</th></tr></thead><tbody>
-    ${ult.map(e => `<tr><td class="fw-semibold">${esc(e.codigo)}</td><td>${esc(cliName(e.cliente_id))}</td><td>${esc(EU[e.pais])}</td><td>${esc(prodName(e.lineas[0].producto_id))}${e.lineas.length > 1 ? ` <span class="text-muted">+${e.lineas.length - 1}</span>` : ""}</td><td>${fdate(e.fecha_envio)}</td><td>${estadoExp(e.estado)}</td></tr>`).join("")}
-    </tbody></table></div></div>`;
-  const porPais = {}; d.exportaciones.filter(e => e.estado !== "CANCELADA").forEach(e => porPais[e.pais] = (porPais[e.pais] || 0) + 1);
-  const top = Object.entries(porPais).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  mkChart("ch-pais", {type:"bar", data:{labels:top.map(t => EU[t[0]]), datasets:[{label:"Exportaciones", data:top.map(t => t[1]), backgroundColor:chartAccent(), borderRadius:6}]},
-    options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}, grid:{color:chartGrid()}}, x:{grid:{display:false}}}}});
+  const card = (col, titulo, cuerpo, extra = "") => `<div class="${col}"><div class="card-cem h-100"><div class="card-h">${titulo}${extra}</div><div class="card-b">${cuerpo}</div></div></div>`;
+  const grafica = (id, label, alto = "") => `<div class="chart-box ${alto}"><canvas id="${id}" aria-label="${label}" role="img"></canvas></div>`;
   const kgp = {}; valid.forEach(e => e.lineas.forEach(l => kgp[l.producto_id] = (kgp[l.producto_id] || 0) + l.kg));
   const tp = Object.entries(kgp).sort((a, b) => b[1] - a[1]); const t4 = tp.slice(0, 4), otros = tp.slice(4).reduce((a, x) => a + x[1], 0);
-  const labels = t4.map(x => prodName(+x[0])).concat(otros ? ["Otros"] : []), vals = t4.map(x => x[1]).concat(otros ? [otros] : []);
-  mkChart("ch-prod", {type:"doughnut", data:{labels, datasets:[{data:vals, backgroundColor:palette(), borderWidth:2}]},
-    options:{maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right", labels:{boxWidth:10, font:{size:11}}}, tooltip:{callbacks:{label:c => `${c.label}: ${nf(c.parsed)} kg`}}}}});
+  const labels = t4.map(x => prodName(+x[0])).concat(otros ? ["Otros"] : []), vals = t4.map(x => x[1]).concat(otros ? [otros] : []), totKg = vals.reduce((a, v) => a + v, 0), pal = palette();
+  const mezcla = vals.length ? `${grafica("ch-prod", "Mezcla de producto exportado", "chart-sm")}<ul class="legend-list compact">${labels.map((l, i) => `<li><span class="dotc" style="background:${pal[i % pal.length]}" aria-hidden="true"></span><span class="n">${esc(l)}</span><b>${nf(vals[i] / totKg * 100, 0)} %</b></li>`).join("")}</ul>` : emptyState("Sin exportaciones para mostrar", "bi-pie-chart");
+  const porPais = {}; d.exportaciones.filter(e => e.estado !== "CANCELADA").forEach(e => porPais[e.pais] = (porPais[e.pais] || 0) + 1);
+  const top = Object.entries(porPais).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  $("#view").innerHTML = pageHead("Dashboard", "Resumen general del sistema") + `
+  <div class="row g-3 mb-3">
+    ${kpi("bi-truck", "", "Total Exportaciones", kv(d.exportaciones.length), delta(cnt(mes), cnt(prev)), spark(serieExp))}
+    ${kpi("bi-people", "blue", "Clientes Activos", kv(act), `<span class="delta flat">${d.clientes.length} registrados</span>`, spark(serieCli))}
+    ${kpi("bi-boxes", "coffee", "Inventario Disponible", `${kv(totalInventario())} <small>kg</small>`, `<span class="delta ${alertasStock().length ? "down" : "up"}">${alertasStock().length ? alertasStock().length + " producto(s) bajo mínimo" : "Stock saludable"}</span>`, spark(stockPorProd, "bars"))}
+    ${kpi("bi-currency-dollar", "amber", "Ventas del mes", `${kv(ventas(mes), "usd0")} <small>USD</small>`, delta(ventas(mes), ventas(prev)), spark(serieVentas))}
+  </div>
+  <div class="row g-3 mb-3">
+    ${card("col-lg-8", "Ventas y exportaciones por mes", grafica("ch-mes", "Ventas en dólares y número de exportaciones de los últimos 6 meses"), `<span class="small fw-normal text-muted">Últimos 6 meses</span>`)}
+    ${card("col-lg-4", "Estado de las exportaciones", embudoEstados(d.exportaciones))}
+  </div>
+  <div class="row g-3 mb-3">
+    ${card("col-lg-5", "Destinos principales", top.length ? grafica("ch-pais", "Exportaciones por país de destino") : emptyState("Sin destinos registrados", "bi-geo-alt"))}
+    ${card("col-md-6 col-lg-4", "Mezcla de producto (kg)", mezcla)}
+    ${card("col-md-6 col-lg-3", "Stock frente al mínimo", stockFrenteMinimo())}
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-7"><div class="card-cem h-100"><div class="card-h">Últimas exportaciones <a href="#exportaciones" class="small fw-normal">Ver todas</a></div>
+      <div class="table-responsive"><table class="table table-cem"><thead><tr><th>ID</th><th>Cliente</th><th>País destino</th><th>Producto</th><th>Fecha de envío</th><th>Estado</th></tr></thead><tbody>
+      ${ult.map(e => `<tr><td class="fw-semibold">${esc(e.codigo)}</td><td>${esc(cliName(e.cliente_id))}</td><td>${esc(EU[e.pais])}</td><td>${esc(prodName(e.lineas[0].producto_id))}${e.lineas.length > 1 ? ` <span class="text-muted">+${e.lineas.length - 1}</span>` : ""}</td><td>${fdate(e.fecha_envio)}</td><td>${estadoExp(e.estado)}</td></tr>`).join("")}
+      </tbody></table></div></div></div>
+    ${card("col-lg-5", "Requiere atención", panelAtencion())}
+  </div>`;
+
+  const acc = chartAccent(), amb = cssv("--cem-hl"), fondo = cssv("--cem-card"), tinta = cssv("--cem-text");
+  mkChart("ch-mes", {type:"bar", data:{labels:meses.map(m => m.label), datasets:[
+    {type:"line", label:"Ventas (USD)", data:serieVentas, yAxisID:"y", borderColor:acc, borderWidth:2.5, tension:.38, fill:true, backgroundColor:c => degradado(c, acc), pointRadius:4, pointHoverRadius:7, pointBackgroundColor:fondo, pointBorderColor:acc, pointBorderWidth:2, order:0},
+    {type:"bar", label:"Exportaciones", data:serieExp, yAxisID:"y1", backgroundColor:hexA(amb, .55), hoverBackgroundColor:amb, borderRadius:8, maxBarThickness:26, order:1}]},
+    options:{maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
+      plugins:{legend:{position:"top", align:"end", labels:{usePointStyle:true, boxWidth:8, boxHeight:8}}, tooltip:{padding:10, callbacks:{label:c => c.dataset.yAxisID === "y" ? ` Ventas: $ ${nf(c.parsed.y)} USD` : ` Exportaciones: ${c.parsed.y}`}}},
+      scales:{y:{beginAtZero:true, grid:{color:chartGrid()}, border:{display:false}, ticks:{callback:v => v >= 1000 ? "$ " + nf(v / 1000) + " k" : "$ " + nf(v)}}, y1:{position:"right", beginAtZero:true, grid:{display:false}, border:{display:false}, ticks:{precision:0}}, x:{grid:{display:false}, border:{display:false}}}}});
+  if (top.length) mkChart("ch-pais", {type:"bar", data:{labels:top.map(t => EU[t[0]]), datasets:[{label:"Exportaciones", data:top.map(t => t[1]), backgroundColor:top.map((t, i) => i ? hexA(acc, .62) : acc), hoverBackgroundColor:acc, borderRadius:10, borderSkipped:false, barThickness:20}]},
+    options:{indexAxis:"y", maintainAspectRatio:false, layout:{padding:{right:30}}, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c => ` ${c.parsed.x} exportación(es)`}}}, scales:{x:{beginAtZero:true, grid:{color:chartGrid()}, border:{display:false}, ticks:{precision:0}}, y:{grid:{display:false}, border:{display:false}}}},
+    plugins:[{id:"valores", afterDatasetsDraw(ch) { const c = ch.ctx; c.save(); c.font = '600 12px Geist, system-ui, sans-serif'; c.fillStyle = tinta; c.textBaseline = "middle"; ch.getDatasetMeta(0).data.forEach((b, i) => c.fillText(String(ch.data.datasets[0].data[i]), b.x + 8, b.y)); c.restore(); }}]});
+  if (vals.length) mkChart("ch-prod", {type:"doughnut", data:{labels, datasets:[{data:vals, backgroundColor:pal, borderColor:fondo, borderWidth:3, hoverOffset:6, spacing:2}]},
+    options:{maintainAspectRatio:false, cutout:"72%", plugins:{legend:{display:false}, tooltip:{callbacks:{label:c => ` ${c.label}: ${nf(c.parsed)} kg`}}}},
+    plugins:[{id:"centro", afterDraw(ch) { const a = ch.chartArea; if (!a) return; const c = ch.ctx, x = (a.left + a.right) / 2, y = (a.top + a.bottom) / 2; c.save(); c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = tinta; c.font = '650 22px Geist, system-ui, sans-serif'; c.fillText(nf(totKg), x, y - 7); c.fillStyle = cssv("--cem-muted"); c.font = '500 11px Geist, system-ui, sans-serif'; c.fillText("kg exportados", x, y + 14); c.restore(); }}]});
 };
 
 /* ======================================================= CLIENTES */
