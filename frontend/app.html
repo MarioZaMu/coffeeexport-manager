@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CoffeeExport Manager · RITECH SAS</title>
 <meta name="description" content="Sistema web para administrar las exportaciones de café y cacao de Colombia hacia la Unión Europea.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b3b35'/%3E%3Cellipse cx='32' cy='34' rx='13' ry='19' transform='rotate(25 32 34)' fill='%236ee0c6'/%3E%3Cpath d='M26 50C32 38 32 30 38 18' stroke='%230b3b35' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314523f'/%3E%3Cellipse cx='32' cy='34' rx='13' ry='19' transform='rotate(25 32 34)' fill='%23f5b041'/%3E%3Cpath d='M26 50C32 38 32 30 38 18' stroke='%2314523f' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/geist-sans.woff2" as="font" type="font/woff2" crossorigin>
 <script>/* tema antes del primer pintado (compartido con la landing) */
 (function(){try{var t=localStorage.getItem("cem_theme");if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var d=document.documentElement;d.dataset.theme=t;d.dataset.bsTheme=t}catch(e){}})();
@@ -19,40 +19,49 @@
 
 <!-- ============ LOGIN ============ -->
 <main id="login-view" hidden aria-label="Iniciar sesión">
-  <div class="login-hero">
-    <img class="login-photo" src="img/hero.jpg" alt="" width="1400" height="933">
-    <div id="hero-logo"></div>
-    <h1>CoffeeExport<small>Manager</small></h1>
-    <p class="lead">Conectando el sabor de Colombia<br>con el mundo</p>
-    <p class="sub">Exportación de café y cacao a la Unión Europea</p>
-    <div class="mt-5 small opacity-75">© 2026 RITECH SAS</div>
-  </div>
-  <div class="login-panel">
-    <form class="login-box" id="login-form" novalidate autocomplete="off">
-      <a class="small d-inline-block mb-3 text-decoration-none" href="index.html"><i class="bi bi-arrow-left"></i> Volver al sitio</a>
+  <section class="login-hero">
+    <img class="login-photo" src="img/hero-800.jpg" srcset="img/hero-800.jpg 800w, img/hero.jpg 1400w" sizes="(max-width: 991px) 100vw, 55vw" alt="" width="800" height="533" fetchpriority="high">
+    <a class="lh-brand" href="index.html"><span class="mark" id="hero-logo"></span><span>CoffeeExport<small>Manager</small></span></a>
+    <div class="lh-copy">
+      <span class="lh-eyebrow">Café y cacao · Colombia → Unión Europea</span>
+      <h1>Conectando el sabor de Colombia con el mundo</h1>
+      <p class="lh-sub">Pedidos, inventario, documentos aduaneros y pagos de cada exportación, en un solo sistema.</p>
+      <ul class="lh-stats" id="lh-stats"></ul>
+    </div>
+    <div class="lh-foot">© 2026 RITECH SAS</div>
+  </section>
+  <section class="login-panel">
+    <div class="lp-top">
+      <a class="lp-back" href="index.html"><i class="bi bi-arrow-left"></i> Volver al sitio</a>
+      <button class="theme-btn" id="login-theme" type="button" aria-label="Cambiar tema claro u oscuro"><i class="bi bi-moon-stars"></i></button>
+    </div>
+    <form class="login-box" id="login-form" novalidate>
       <h2>Iniciar sesión</h2>
-      <p class="text-muted mb-4">Ingresa tus credenciales para acceder al sistema</p>
+      <p class="intro">Ingresa tus credenciales para acceder al sistema</p>
       <div id="login-error" class="alert alert-danger py-2 small" role="alert" hidden></div>
-      <div class="mb-3 input-icon">
-        <i class="bi bi-envelope lead-i"></i>
-        <input type="email" class="form-control" id="login-email" placeholder="Usuario o correo electrónico" aria-label="Correo electrónico" required>
+      <div class="fl">
+        <i class="bi bi-envelope lead-i" aria-hidden="true"></i>
+        <input type="email" class="form-control" id="login-email" placeholder=" " autocomplete="username" required>
+        <label for="login-email">Correo electrónico</label>
       </div>
-      <div class="mb-3 input-icon">
-        <i class="bi bi-lock lead-i"></i>
-        <input type="password" class="form-control" id="login-pass" placeholder="Contraseña" aria-label="Contraseña" required>
+      <div class="fl">
+        <i class="bi bi-lock lead-i" aria-hidden="true"></i>
+        <input type="password" class="form-control" id="login-pass" placeholder=" " autocomplete="current-password" required aria-describedby="caps-warn">
+        <label for="login-pass">Contraseña</label>
         <button type="button" class="toggle-pass" id="toggle-pass" aria-label="Mostrar u ocultar contraseña"><i class="bi bi-eye"></i></button>
       </div>
+      <div class="caps-warn" id="caps-warn" role="status" hidden><i class="bi bi-capslock-fill"></i>Bloq Mayús está activado</div>
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="form-check"><input class="form-check-input" type="checkbox" id="login-remember"><label class="form-check-label small" for="login-remember">Recordarme</label></div>
         <a href="#" class="small" id="forgot">¿Olvidaste tu contraseña?</a>
       </div>
-      <button class="btn btn-cem w-100 py-2" type="submit">Iniciar sesión</button>
-      <div class="demo-users mt-4">
-        <div class="small text-muted"><i class="bi bi-info-circle"></i> Modo demostración · clic para autocompletar un rol</div>
-        <div id="demo-users"></div>
+      <button class="btn btn-cem w-100" type="submit">Iniciar sesión</button>
+      <div class="demo">
+        <div class="demo-h">Acceso de demostración · elige un rol</div>
+        <div class="demo-grid" id="demo-users"></div>
       </div>
     </form>
-  </div>
+  </section>
 </main>
 
 <!-- ============ APP ============ -->
@@ -60,7 +69,7 @@
   <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
     <div class="brand"><span id="side-logo"></span><div class="name">CoffeeExport<small>Manager</small></div></div>
     <ul class="nav-cem" id="nav"></ul>
-    <div class="side-foot">RITECH SAS · Sprint 2<br>Prototipo de interfaz</div>
+    <div class="side-foot">RITECH SAS · Sprint 4</div>
   </aside>
   <div class="sidebar-backdrop" id="backdrop"></div>
   <div class="main">

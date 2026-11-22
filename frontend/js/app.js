@@ -15,37 +15,54 @@ function restoreSession() {
 }
 
 /* ---------------- Login ---------------- */
+/* Tarjetas del acceso de demostración: ícono, color y una línea de lo que puede hacer cada rol (RF-04) */
+const ROL_UI = {ADMIN:["bi-shield-lock", 1, "Acceso total y usuarios"], GERENTE:["bi-graph-up-arrow", 3, "Dashboard y reportes"],
+  OP_EXPORTACIONES:["bi-truck", 2, "Clientes, envíos y documentos"], OP_BODEGA:["bi-box-seam", 4, "Inventario y movimientos"], CONTADOR:["bi-cash-coin", 1, "Pagos y finanzas"]};
+const LAST_DEMO = "cem_last_demo";
 function showLogin(msg) {
-  killCharts(); Session.user = null; $("#app").hidden = true; $("#login-view").hidden = false;
-  $("#hero-logo").innerHTML = logoSVG(96, "#f0a830", "#123b30");
+  killCharts(); Session.user = null; $("#app").hidden = true; const lv = $("#login-view"); lv.classList.remove("leaving"); lv.hidden = false;
+  $("#hero-logo").innerHTML = logoSVG(30, "#f5b041", "#14523f");
+  $("#lh-stats").innerHTML = [[Object.keys(EU).length, "países de la UE"], [PUERTOS_SALIDA.length, "puertos de salida"], [DOCS_OBLIGATORIOS.length, "documentos por envío"]]
+    .map(([n, t]) => `<li><b>${n}</b><span>${t}</span></li>`).join("");
   const cuentas = Api.on ? DEMO_CUENTAS : Store.db.usuarios.filter(u => u.activo).map(u => [u.email, u.rol]);
-  $("#demo-users").innerHTML = cuentas.map(([email, rol]) => `<button type="button" data-u="${esc(email)}">${esc(ROLES[rol].nombre)}</button>`).join("");
-  $$("#demo-users [data-u]").forEach(b => b.onclick = () => { $("#login-email").value = b.dataset.u; $("#login-pass").value = "Demo2026*"; $("#login-pass").focus(); });
+  let ultimo = ""; try { ultimo = localStorage.getItem(LAST_DEMO) || ""; } catch (e) { /* sin almacenamiento */ }
+  $("#demo-users").innerHTML = cuentas.map(([email, rol]) => { const [ic, c, d] = ROL_UI[rol] || ["bi-person", 1, ""];
+    return `<button type="button" data-u="${esc(email)}" class="${email === ultimo ? "sel" : ""}"><span class="ic" style="background:var(--ico-${c});color:var(--ico-${c}c)"><i class="bi ${ic}"></i></span><span><span class="t">${esc(ROLES[rol].nombre)}</span><span class="d">${esc(d)}</span></span></button>`; }).join("");
+  $$("#demo-users [data-u]").forEach(b => b.onclick = () => {
+    $$("#demo-users .sel").forEach(x => x.classList.remove("sel")); b.classList.add("sel");
+    $("#login-email").value = b.dataset.u; $("#login-pass").value = "Demo2026*"; $("#login-pass").focus();
+    try { localStorage.setItem(LAST_DEMO, b.dataset.u); } catch (e) { /* sin almacenamiento */ }
+  });
   const err = $("#login-error"); err.hidden = !msg; err.textContent = msg || "";
   history.replaceState(null, "", location.pathname);
+}
+/* Transición corta del login al sistema (se omite con movimiento reducido) */
+function entrar() {
+  const lv = $("#login-view"); if (reducedMotion()) return startApp(true);
+  lv.classList.add("leaving"); setTimeout(() => { lv.classList.remove("leaving"); startApp(true); }, 340);
 }
 async function doLogin(e) {
   e.preventDefault();
   const email = $("#login-email").value.trim().toLowerCase(), pass = $("#login-pass").value, err = $("#login-error");
-  const fail = m => { err.hidden = false; err.textContent = m; };
+  const fail = m => { err.hidden = false; err.textContent = m; const f = $("#login-form"); f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake"); };
   if (!email || !pass) return fail("Ingrese su correo y contraseña.");
   if (Api.on) {   // modo conectado: la validación (BCrypt, usuario activo) la hace el servidor
     const btn = $("#login-form [type=submit]"), txt = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Ingresando…`;
     try { Session.user = await Api.login(email, pass); await Api.refresh(); } catch (er) { Session.user = null; return fail(er.message); }
     finally { btn.disabled = false; btn.innerHTML = txt; }
-    Session.last = Date.now(); $("#login-pass").value = ""; err.hidden = true; return startApp(true);
+    Session.last = Date.now(); $("#login-pass").value = ""; err.hidden = true; return entrar();
   }
   const u = Store.db.usuarios.find(x => x.email.toLowerCase() === email);
   if (!u || u.password !== pass) return fail("Credenciales incorrectas");            // mensaje genérico (UC-01 3a)
   if (!u.activo) return fail("Su usuario está inactivo. Contacte al administrador.");
   Session.user = u; Session.last = Date.now(); saveSession($("#login-remember").checked);
-  $("#login-pass").value = ""; err.hidden = true; startApp(true);
+  $("#login-pass").value = ""; err.hidden = true; entrar();
 }
 
 /* ---------------- App ---------------- */
 function startApp(fresh) {
   const u = Session.user; $("#login-view").hidden = true; $("#app").hidden = false;
-  $("#side-logo").innerHTML = logoSVG(36, "#f0a830", "#123b30");
+  $("#side-logo").innerHTML = logoSVG(36, "#f5b041", "#14523f");
   $("#u-name").textContent = u.nombre.split(" ")[0] === "Administrador" ? "Admin" : u.nombre; $("#u-role").textContent = ROLES[u.rol].nombre; $("#u-mail").textContent = u.email;
   $("#u-avatar").textContent = u.nombre.split(" ").map(x => x[0]).slice(0, 2).join("").toUpperCase();
   $("#nav").innerHTML = MODULOS.filter(m => can(m.id)).map(m => `<li><a href="#${m.id}" data-m="${m.id}"><i class="bi ${m.icon}"></i><span>${m.label}</span></a></li>`).join("");
@@ -120,13 +137,20 @@ document.addEventListener("DOMContentLoaded", () => {
   Api.init(); Store.load();
   $("#login-form").addEventListener("submit", doLogin);
   $("#toggle-pass").onclick = () => { const p = $("#login-pass"), show = p.type === "password"; p.type = show ? "text" : "password"; $("#toggle-pass i").className = `bi bi-eye${show ? "-slash" : ""}`; };
-  $("#forgot").onclick = e => { e.preventDefault(); toast("Contacte al administrador para restablecer su contraseña.", "info"); };
+  $("#login-form").addEventListener("animationend", e => { if (e.animationName === "shake") e.currentTarget.classList.remove("shake"); });
+  const caps = e => { if (e.getModifierState) $("#caps-warn").hidden = !e.getModifierState("CapsLock"); };
+  $("#login-pass").addEventListener("keydown", caps); $("#login-pass").addEventListener("keyup", caps);
+  $("#login-pass").addEventListener("blur", () => { $("#caps-warn").hidden = true; });
+  $("#forgot").onclick = e => { e.preventDefault(); openModal({title:"Recuperar contraseña", hideFoot:true, body:`
+    <p class="mb-3">Por seguridad, las contraseñas solo las restablece el <b>administrador</b> del sistema (RF-01). Escríbale indicando su correo corporativo y él le asignará una contraseña temporal.</p>
+    <div class="alert alert-light small mb-0"><i class="bi bi-info-circle me-1"></i>En <b>modo demostración</b> no necesita contraseña propia: elija un rol en <b>Acceso de demostración</b> y se completan los datos.</div>`}); };
   $("#logout").onclick = e => { e.preventDefault(); logout(); };
   $("#menu-toggle").onclick = () => { $("#sidebar").classList.add("open"); $("#backdrop").classList.add("show"); };
   $("#backdrop").onclick = closeSidebar;
   initSearch(); watchTables(); watchNet();
-  const paintTheme = () => { $("#theme-ic").className = "bi " + (isDark() ? "bi-sun" : "bi-moon-stars"); };
+  const paintTheme = () => { const c = "bi " + (isDark() ? "bi-sun" : "bi-moon-stars"); $("#theme-ic").className = c; $("#login-theme i").className = c; };
   paintTheme();
+  $("#login-theme").onclick = () => $("#theme").onclick();
   $("#theme").onclick = () => { const t = isDark() ? "light" : "dark"; document.documentElement.dataset.theme = t; document.documentElement.dataset.bsTheme = t;
     try { localStorage.setItem("cem_theme", t); } catch (e) { /* sin almacenamiento */ } paintTheme(); if (Session.user) route(); };
   window.addEventListener("hashchange", route);

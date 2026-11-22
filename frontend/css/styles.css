@@ -7,11 +7,12 @@
 :root{
   --r:20px; --r-ctl:12px; --ease:cubic-bezier(.16,1,.3,1);
   --cem-side:#0e2c24; --cem-side-2:#123b30; --cem-side-hover:#1a4a3d; --cem-side-active:#1f5646; --cem-side-ink:#c7dbd3;
-  --cem-bg:#f3f4f0; --cem-card:#fbfbf8; --cem-text:#13201b; --cem-muted:#56635d; --cem-line:#d9ddd4; --cem-tint:#e7ece3;
-  --cem-accent:#123b30; --cem-accent-d:#0c2a22; --cem-btn-ink:#f3f6f1; --cem-hl:#9a5b00;
-  --cem-danger:#b83a3a; --cem-chart:#1b5645; --cem-grid:#e8ece4;
-  --shadow:0 1px 2px rgba(18,59,48,.05),0 12px 30px -16px rgba(18,59,48,.22);
-  --ico-1:#dfeee7; --ico-1c:#1b5645; --ico-2:#fbeacb; --ico-2c:#8a5200; --ico-3:#dde9f5; --ico-3c:#2a5f94; --ico-4:#efe5da; --ico-4c:#6a4a30;
+  --cem-bg:#f5f7f2; --cem-card:#ffffff; --cem-text:#10211a; --cem-muted:#52615a; --cem-line:#dbe2d8; --cem-tint:#e8f0e7;
+  --cem-accent:#14523f; --cem-accent-d:#0d3b2d; --cem-btn-ink:#f5f8f3; --cem-hl:#a35f00;
+  --cem-danger:#b83a3a; --cem-chart:#1d7356; --cem-grid:#e6ece3;
+  --cem-bean:#f5b041; --cem-logo-bg:#14523f;   /* logo: grano ámbar brillante sobre verde, igual en ambos temas */
+  --shadow:0 1px 2px rgba(20,82,63,.05),0 12px 30px -16px rgba(20,82,63,.24);
+  --ico-1:#dcf0e5; --ico-1c:#1d7356; --ico-2:#fbeacb; --ico-2c:#8a5200; --ico-3:#dde9f5; --ico-3c:#2a5f94; --ico-4:#efe5da; --ico-4c:#6a4a30;
   --st-green-bg:#dcf1e6; --st-green:#14653c; --st-blue-bg:#dde9f7; --st-blue:#1f5594; --st-amber-bg:#fbebc9; --st-amber:#855000;
   --st-red-bg:#f9dddd; --st-red:#9a2a2a; --st-gray-bg:#e6ebe7; --st-gray:#52605b; --st-orange-bg:#fbe3d0; --st-orange:#94440a;
 }
@@ -66,24 +67,82 @@ a{color:var(--cem-accent)} a:hover{color:var(--cem-accent-d)}
 .alert-danger{background:var(--st-red-bg);color:var(--st-red);border-color:transparent}
 
 /* ---------- Login ---------- */
-#login-view{min-height:100vh;display:flex}
-.login-hero{flex:1.15;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:3rem;overflow:hidden;isolation:isolate;background:#0e2c24}
-.login-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.login-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(160deg,rgba(10,32,25,.82),rgba(10,32,25,.45) 55%,rgba(24,14,8,.7))}
-.login-hero h1{color:#fff;font-size:2.7rem;margin:.6rem 0 0;letter-spacing:-.035em}
-.login-hero h1 small{display:block;font-weight:400;font-size:1.5rem;opacity:.85}
-.login-hero p.lead{margin-top:2rem;font-weight:600;font-size:1.15rem}
-.login-hero p.sub{opacity:.85;font-size:.95rem}
-.login-panel{flex:1;background:var(--cem-bg);display:flex;align-items:center;justify-content:center;padding:2rem}
-.login-box{width:100%;max-width:380px}
-.login-box h2{font-size:1.6rem;margin-bottom:.2rem}
+/* Escritorio: foto a la izquierda con mensaje y cifras abajo; formulario amplio a la derecha.
+   Móvil: franja de foto con la marca arriba y el formulario como tarjeta que se monta encima. */
+#login-view{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--cem-bg)}
+#login-view.leaving{animation:login-out .36s var(--ease) forwards}
+@keyframes login-out{to{opacity:0;transform:scale(.985)}}
+.login-hero{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:2rem;color:#fff;padding:clamp(1.5rem,3vw,2.75rem);overflow:hidden;isolation:isolate;background:#0e2c24}
+.login-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;animation:kenburns 26s ease-out both}
+@keyframes kenburns{from{transform:scale(1.12)}to{transform:scale(1)}}
+.login-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,24,18,.55),rgba(7,24,18,0) 70%),linear-gradient(180deg,rgba(7,24,18,.55) 0%,rgba(7,24,18,.08) 30%,rgba(7,24,18,.55) 58%,rgba(7,24,18,.94) 100%)}
+.login-hero .lh-copy{margin-top:auto;text-shadow:0 1px 18px rgba(0,0,0,.35)}
+.lh-brand{display:inline-flex;align-items:center;gap:.75rem;color:#fff;text-decoration:none;font-weight:650;letter-spacing:-.02em;line-height:1.05;font-size:1.12rem;align-self:flex-start}
+.lh-brand:hover{color:#fff}
+.lh-brand small{display:block;font-weight:450;font-size:.75rem;opacity:.8;letter-spacing:0;margin-top:2px}
+.lh-brand .mark{width:46px;height:46px;border-radius:14px;background:var(--cem-logo-bg);display:grid;place-items:center;box-shadow:0 10px 24px -10px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.08)}
+.lh-copy{max-width:36rem}
+.lh-eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-size:.75rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:#f7c56e;margin-bottom:1rem}
+.lh-eyebrow::before{content:"";width:24px;height:2px;border-radius:2px;background:currentColor}
+.login-hero h1{color:#fff;font-size:clamp(2rem,3.3vw,3.15rem);line-height:1.04;letter-spacing:-.045em;margin:0;text-wrap:balance}
+.lh-sub{margin:1rem 0 0;color:rgba(255,255,255,.82);font-size:1rem;max-width:30rem;line-height:1.55}
+.lh-stats{list-style:none;display:flex;flex-wrap:wrap;gap:1rem clamp(1.5rem,3vw,2.75rem);padding:1.4rem 0 0;margin:1.75rem 0 0;border-top:1px solid rgba(255,255,255,.2)}
+.lh-stats b{display:block;font-size:1.75rem;font-weight:650;letter-spacing:-.035em;font-variant-numeric:tabular-nums;line-height:1.1}
+.lh-stats span{font-size:.78rem;color:rgba(255,255,255,.75)}
+.lh-foot{font-size:.76rem;color:rgba(255,255,255,.6)}
+.login-panel{position:relative;display:flex;flex-direction:column;padding:clamp(1.25rem,3vw,2rem) clamp(1.25rem,4.5vw,4rem);background:var(--cem-bg)}
+.lp-top{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.lp-back{display:inline-flex;align-items:center;gap:.45rem;color:var(--cem-muted);text-decoration:none;font-size:.88rem;font-weight:500;padding:.45rem .1rem}
+.lp-back:hover{color:var(--cem-text)}.lp-back i{transition:transform .25s var(--ease)}.lp-back:hover i{transform:translateX(-3px)}
+.login-box{width:100%;max-width:440px;margin:auto;padding:2rem 0}
+.login-box h2{font-size:clamp(1.75rem,2.4vw,2.15rem);letter-spacing:-.04em;margin-bottom:.35rem}
+.login-box .intro{color:var(--cem-muted);margin-bottom:1.6rem}
+/* campos con etiqueta flotante: la etiqueta queda visible al escribir */
+.fl{position:relative;margin-bottom:1rem}
+.fl .form-control{height:56px;padding:1.35rem 3rem .4rem 2.85rem;border-radius:14px;font-size:.96rem;background:var(--cem-card)}
+.fl label{position:absolute;left:2.85rem;top:28px;transform:translateY(-50%);color:var(--cem-muted);font-size:.95rem;pointer-events:none;transition:top .2s var(--ease),font-size .2s var(--ease),color .2s}
+.fl .form-control:focus~label,.fl .form-control:not(:placeholder-shown)~label{top:16px;font-size:.7rem;font-weight:600;letter-spacing:.01em}
+.fl .form-control:focus~label{color:var(--cem-hl)}
+.fl>.lead-i{position:absolute;left:1rem;top:28px;transform:translateY(-50%);color:var(--cem-muted);font-size:1.05rem;transition:color .2s}
+.fl:focus-within>.lead-i{color:var(--cem-hl)}
+.fl .toggle-pass{position:absolute;right:.45rem;top:28px;transform:translateY(-50%);width:42px;height:42px;border:0;border-radius:10px;background:none;color:var(--cem-muted);transition:background-color .2s,color .2s}
+.fl .toggle-pass:hover{background:var(--cem-tint);color:var(--cem-text)}
+.caps-warn{display:flex;align-items:center;gap:.45rem;font-size:.78rem;font-weight:550;color:var(--st-amber);background:var(--st-amber-bg);border-radius:10px;padding:.4rem .7rem;margin:-.4rem 0 1rem}
+.login-box .btn-cem{height:52px;border-radius:999px;font-weight:600;font-size:.98rem}
+.login-box.shake{animation:shake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+/* acceso de demostración en tarjetas: cada rol dice qué puede hacer */
+.demo{margin-top:1.75rem}
+.demo-h{display:flex;align-items:center;gap:.75rem;color:var(--cem-muted);font-size:.76rem;margin-bottom:.75rem;white-space:nowrap}
+.demo-h::before,.demo-h::after{content:"";flex:1;height:1px;background:var(--cem-line)}
+.demo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.demo-grid button{display:flex;align-items:center;gap:.65rem;text-align:left;border:1px solid var(--cem-line);background:var(--cem-card);border-radius:14px;padding:.6rem .7rem;min-height:58px;color:var(--cem-text);transition:border-color .2s,background-color .2s,transform .2s var(--ease),box-shadow .2s}
+.demo-grid button:hover{border-color:var(--cem-hl);transform:translateY(-1px)}
+.demo-grid button:active{transform:scale(.98)}
+.demo-grid button.sel{border-color:var(--cem-accent);background:var(--cem-tint);box-shadow:inset 0 0 0 1px var(--cem-accent)}
+.demo-grid button:last-child:nth-child(odd){grid-column:1/-1}
+.demo-grid .ic{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:1rem}
+.demo-grid .t{display:block;font-size:.8rem;font-weight:620;line-height:1.2}
+.demo-grid .d{display:block;font-size:.7rem;color:var(--cem-muted);line-height:1.25;margin-top:1px}
+/* entrada escalonada del formulario y de la marca */
+.login-box>*{animation:card-in .6s var(--ease) both}
+.login-box>:nth-child(2){animation-delay:.04s}.login-box>:nth-child(3){animation-delay:.08s}.login-box>:nth-child(4){animation-delay:.12s}
+.login-box>:nth-child(5){animation-delay:.16s}.login-box>:nth-child(6){animation-delay:.2s}.login-box>:nth-child(7){animation-delay:.24s}
+.login-box>:nth-child(n+8){animation-delay:.28s}
+.lh-brand,.lh-copy{animation:card-in .8s var(--ease) .1s both}.lh-copy{animation-delay:.25s}
+@media (max-width:991.98px){
+  #login-view{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .login-hero{min-height:250px;padding:1.25rem 1.25rem 3.25rem;gap:1.25rem}
+  .lh-sub,.lh-stats,.lh-foot{display:none}
+  .login-hero h1{font-size:clamp(1.55rem,6vw,2.1rem)}
+  .lh-eyebrow{margin-bottom:.6rem}
+  .login-panel{margin-top:-1.75rem;border-radius:24px 24px 0 0;z-index:1;padding-top:1rem;box-shadow:0 -12px 30px -18px rgba(0,0,0,.45)}
+  .login-box{padding:1.25rem 0 2rem}
+}
 .input-icon{position:relative}
 .input-icon>i.lead-i{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--cem-muted)}
 .input-icon>.form-control{padding-left:2.4rem;padding-top:.6rem;padding-bottom:.6rem}
 .input-icon .toggle-pass{position:absolute;right:.6rem;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--cem-muted)}
-.demo-users{border:1px dashed var(--cem-line);border-radius:var(--r-ctl);padding:.7rem .8rem;background:var(--cem-card)}
-.demo-users button{border:1px solid var(--cem-line);background:var(--cem-bg);border-radius:20px;font-size:.72rem;padding:.15rem .6rem;margin:.15rem .1rem 0 0;color:var(--cem-text);transition:border-color .2s,color .2s}
-.demo-users button:hover{border-color:var(--cem-hl);color:var(--cem-hl)}
 
 /* ---------- Layout ---------- */
 #app{min-height:100vh}
@@ -186,7 +245,7 @@ tr:hover .pimg img{transform:scale(1.12)}
   .sidebar{transform:translateX(-100%)} .sidebar.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.4)}
   .sidebar-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1035}
   .main{margin-left:0} .menu-toggle{display:inline-block} .content{padding:1rem} .topbar{padding:.6rem 1rem}
-  .login-hero{display:none} .wizard-steps .lbl{display:none}
+  .wizard-steps .lbl{display:none}
 }
 @media (max-width:575.98px){.topbar .user-meta{display:none}.page-head h1{font-size:1.3rem}.kpi{flex-direction:column;align-items:flex-start;gap:.6rem;padding:1rem}.kpi .val{font-size:1.35rem}.kpi .ico{width:40px;height:40px;font-size:1.1rem}}
 /* ---------- tablero: minigráficas, embudo de estados, stock y panel de atención ---------- */
