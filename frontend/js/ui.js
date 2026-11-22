@@ -32,7 +32,7 @@ function openModal({title, body, saveLabel = "Guardar", onSave, size = "", hideF
   $("#modal-title").textContent = title; $("#modal-body").innerHTML = body;
   const foot = $("#modal-foot"); foot.hidden = hideFoot;
   foot.innerHTML = `<button class="btn btn-light" data-bs-dismiss="modal" type="button">${esc(cancelLabel)}</button>` + (onSave ? `<button class="btn ${danger ? "btn-danger" : "btn-cem"}" id="modal-save" type="button">${esc(saveLabel)}</button>` : "");
-  _modal = bootstrap.Modal.getOrCreateInstance($("#modal")); _modal.show();
+  _modal = bootstrap.Modal.getOrCreateInstance($("#modal")); _modal.show(); validarAlSalir($("#modal-body"));
   if (onSave) $("#modal-save").onclick = async () => { const r = await onSave($("#modal-body")); if (r !== false) _modal.hide(); };
   const first = $("#modal-body input:not([type=hidden]),#modal-body select"); if (first) $("#modal").addEventListener("shown.bs.modal", () => first.focus(), {once:true});
 }
@@ -46,7 +46,47 @@ function formErrors(root, msgs) {
   let box = $(".form-errors", root);
   if (!box) { box = document.createElement("div"); box.className = "form-errors alert alert-danger py-2 small"; box.setAttribute("role", "alert"); root.prepend(box); }
   box.hidden = !msgs.length; box.innerHTML = msgs.map(m => `<div><i class="bi bi-exclamation-circle me-1"></i>${esc(m)}</div>`).join("");
+  marcarCampos(root, msgs);
   if (msgs.length) box.scrollIntoView({block:"nearest"}); return !msgs.length;
+}
+
+/* ---------- Validación por campo: el mensaje aparece bajo el campo que falla (además del resumen superior) ---------- */
+const _norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const _vacias = new Set(["para", "como", "del", "los", "las", "este", "esta", "con", "una", "que", "por", "sus"]);
+const _tokens = txt => [...new Set(_norm(txt).split(/[^a-z0-9]+/).filter(t => t.length >= 4 && !_vacias.has(t)))];
+function limpiarCampo(el) {
+  el.classList.remove("is-invalid"); el.removeAttribute("aria-invalid");
+  const caja = el.closest(".form-check") || el.parentElement, e = caja && caja.querySelector(".field-error");
+  if (e && e.dataset.para === (el.name || el.id)) e.remove();
+  if (el.getAttribute("aria-describedby") && /^err-/.test(el.getAttribute("aria-describedby"))) el.removeAttribute("aria-describedby");
+}
+function marcarCampo(el, msg) {
+  limpiarCampo(el);
+  el.classList.add("is-invalid"); el.setAttribute("aria-invalid", "true");
+  const id = "err-" + (el.name || el.id), check = el.closest(".form-check");
+  const e = document.createElement("div"); e.className = "field-error"; e.id = id; e.dataset.para = el.name || el.id; e.innerHTML = `<i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>${esc(msg)}`;
+  (check || el).insertAdjacentElement(check ? "beforeend" : "afterend", e);
+  el.setAttribute("aria-describedby", id);
+  const quitar = () => limpiarCampo(el); el.addEventListener("input", quitar, {once:true}); el.addEventListener("change", quitar, {once:true});
+}
+function marcarCampos(root, msgs) {
+  $$(".is-invalid", root).forEach(limpiarCampo); $$(".field-error", root).forEach(e => e.remove());
+  if (!msgs.length) return;
+  const campos = $$("[name]", root).filter(e => e.type !== "hidden" && !e.disabled).map(el => { const l = (el.closest(".form-check") || el.closest("[class*=col]") || el.parentElement)?.querySelector("label"); return {el, tok:_tokens(l ? l.textContent : "")}; });
+  let primero = null;
+  msgs.forEach(m => { const nm = _norm(m); let mejor = null, punt = 0;
+    campos.forEach(c => { const s = c.tok.filter(t => nm.includes(t)).length; if (s > punt) { punt = s; mejor = c; } });
+    if (mejor && punt >= 1) { marcarCampo(mejor.el, m); primero = primero || mejor.el; } });
+  if (primero) primero.focus({preventScroll:true});
+}
+/* Validación al salir de un campo obligatorio o de correo (sin esperar al botón Guardar) */
+function validarAlSalir(root) {
+  $$("[required]", root).forEach(el => el.addEventListener("blur", () => {
+    const v = el.type === "checkbox" ? el.checked : String(el.value).trim();
+    if (!v) return marcarCampo(el, "Este campo es obligatorio.");
+    if (el.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return marcarCampo(el, "Ingrese un correo válido, por ejemplo nombre@empresa.com.");
+    limpiarCampo(el);
+  }));
 }
 
 /* ---------- Formularios ---------- */
@@ -118,6 +158,11 @@ const isDark = () => document.documentElement.dataset.theme === "dark";
 const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const palette = () => isDark() ? ["#4fb58f","#f0a830","#6fa8dc","#c19a6b","#93c47d","#e0795f","#9fb0a8"] : ["#1b5645","#d98e04","#3b7fb8","#7a5a3e","#6aa84f","#c4553d","#5d6b66"];
 const chartAccent = () => cssv("--cem-chart"), chartGrid = () => cssv("--cem-grid");
+/* Librerías pesadas (PDF y Excel) solo se descargan cuando alguien exporta un reporte */
+const _libs = {};
+const cargarScript = url => _libs[url] || (_libs[url] = new Promise((ok, mal) => { const s = document.createElement("script"); s.src = url; s.onload = ok; s.onerror = () => { delete _libs[url]; mal(new Error("No se pudo cargar " + url)); }; document.head.appendChild(s); }));
+const LIBS = {pdf:["https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"], xls:["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]};
+async function cargarLibs(tipo) { for (const u of LIBS[tipo]) await cargarScript(u); }   // en orden: autotable necesita jsPDF
 const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 function mkChart(id, cfg) {
   const el = document.getElementById(id); if (!el) return;

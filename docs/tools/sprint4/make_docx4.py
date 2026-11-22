@@ -399,6 +399,17 @@ def main():
         vineta(doc, f"**{dd[0]}** ({dd[1]}): {dd[3]} **Corrección:** {dd[5]}")
 
     # ---- 8
+    titulo(doc, "7.4 Rendimiento y accesibilidad (Lighthouse)", 2)
+    import json as _json
+    LH = os.path.join(D.REPO, "docs", "sprint4", "lighthouse")
+    filas_lh = []
+    for nombre, fich in (("Landing", "landing"), ("Sistema", "sistema")):
+        a = _json.load(open(os.path.join(LH, fich + "-antes.report.json"), encoding="utf-8"))["categories"]
+        d = _json.load(open(os.path.join(LH, fich + "-despues.report.json"), encoding="utf-8"))["categories"]
+        filas_lh.append([nombre] + [f"{round(a[k]['score'] * 100)} → {round(d[k]['score'] * 100)}" for k in ("performance", "accessibility", "best-practices", "seo")])
+    parr(doc, "Se midió con Lighthouse la web publicada en Vercel (simulación móvil) antes y después de las mejoras. Las categorías de rendimiento y accesibilidad superan la meta de 90.")
+    tabla(doc, ["Página", "Rendimiento", "Accesibilidad", "Buenas prácticas", "SEO"], filas_lh, [3.4, 3.4, 3.4, 3.8, 3.4], tam=9.5)
+    parr(doc, "Qué se cambió: fotos redimensionadas al tamaño mostrado y portada ligera con precarga, iconos y scripts que ya no bloquean el pintado, librerías de PDF y Excel que se descargan solo al exportar, un elemento main en el login y etiquetas accesibles que coinciden con el texto visible. Los informes completos están en docs/sprint4/lighthouse.")
     salto(doc)
     titulo(doc, "8. Bloqueos encontrados y soluciones")
     tabla(doc, ["Bloqueo", "Efecto", "Solución", "Estado"], [list(x) for x in D.BLOQUEOS], [5.4, 3.6, 6.6, 1.8], tam=8.5, resaltar=(3, {"Resuelto": VERDE2, "Mitigado": RGBColor(0xB2, 0x6A, 0x00), "Pendiente": ROJO}))
@@ -437,6 +448,7 @@ def main():
         ["Prototipo de interfaz, rediseño de landing y pruebas del Sprint 3 (58)", "Agente de IA, dirigido por el equipo", "Claude Code"],
         ["Requisitos, historias de usuario, plan de pruebas y diseño del Sprint 1 y 2", "Equipo", "—"],
         ["Descarga de las 11 fotos temporales de Unsplash al proyecto (frontend/img)", "Agente de IA", "Claude Code"],
+        ["Rediseño del dashboard, validación por campo, iconos unificados y mejoras de rendimiento", "Agente de IA, a pedido del equipo", "Claude Code"],
         ["Fotos propias, Jira, publicación y revisión final", "Equipo", "—"],
     ], [8, 5.2, 4.2], tam=9)
     parr(doc, "El detalle de qué integrante lideró cada módulo está en la presentación del Sprint 4 y en el tablero de Jira del equipo.")
@@ -447,7 +459,7 @@ def main():
               "Los 44 casos del plan del Sprint 2 pasaron de planificados a ejecutados con evidencia.",
               "Las pruebas encontraron 7 defectos reales; cada uno quedó corregido y cubierto por una prueba de regresión.",
               "El pipeline repite todo automáticamente en cada cambio y cada lunes, por lo que una regresión se detecta sin intervención humana.",
-              "Se verificó además la suite del backend contra **MySQL 8.4.10 real**: 139 de 139. **Pendiente:** medir Lighthouse y accesibilidad, reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo. La interfaz ya está publicada en modo demostración en https://coffeeexport-manager.vercel.app."):
+              "Se verificó además la suite del backend contra **MySQL 8.4.10 real**: 139 de 139. Lighthouse sobre la web publicada (móvil): landing 94, 100, 100 y 100 y sistema 97, 100, 100 y 100 en rendimiento, accesibilidad, buenas prácticas y SEO. **Pendiente:** reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo. La interfaz ya está publicada en modo demostración en https://coffeeexport-manager.vercel.app."):
         vineta(doc, s)
 
     # ---- anexos

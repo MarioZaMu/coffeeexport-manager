@@ -117,6 +117,7 @@ EJECUCIONES = [
     ("6", "Frontend completo: unitarias, integración y sistema", "68", "68", "0", "30 unitarias, 28 de integración (modo demostración) y 10 de sistema contra el backend real; 133 s en total."),
     ("7", "Backend completo contra MySQL 8.4.10 real", "139", "139", "0", "Primera corrida con 5 errores: RepositoriosTest usaba H2 con el dialecto MySQL y el build se detenía antes de las pruebas de integración. Corregido; Hibernate creó las 13 tablas."),
     ("8", "Frontend completo con la interfaz rediseñada", "68", "68", "0", "Dashboard nuevo (gráficas, embudo de estados, stock frente al mínimo, panel de atención), tablas en tarjetas en móvil y estados de error."),
+    ("9", "Frontend completo con validación por campo y mejoras de carga", "68", "68", "0", "Mensaje bajo cada campo, iconos unificados (Bootstrap Icons), fotos optimizadas, librerías de PDF y Excel bajo demanda. Lighthouse: 94 y 97 de rendimiento, 100 de accesibilidad."),
 ]
 
 DEFECTOS = [

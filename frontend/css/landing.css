@@ -34,7 +34,7 @@ p{margin:0}
 /* ---------- botones ---------- */
 .btn{display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;font:inherit;font-weight:560;font-size:.95rem;text-decoration:none;border:1px solid transparent;border-radius:var(--r-pill);padding:.62rem 1.15rem;cursor:pointer;transition:transform .25s var(--ease),background-color .25s,box-shadow .25s,border-color .25s}
 .btn i{transition:transform .3s var(--ease)}
-.btn:hover i.ph-arrow-right{transform:translateX(3px)}.btn:hover i.ph-arrow-down{transform:translateY(3px)}
+.btn:hover i.bi-arrow-right{transform:translateX(3px)}.btn:hover i.bi-arrow-down{transform:translateY(3px)}
 .btn:active{transform:scale(.97)}
 .btn-lg{padding:.85rem 1.5rem;font-size:1rem}
 .btn-solid{background:var(--btn-bg);color:var(--btn-ink)}.btn-solid:hover{box-shadow:0 10px 26px -10px var(--forest);transform:translateY(-1px)}

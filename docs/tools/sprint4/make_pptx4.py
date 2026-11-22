@@ -334,6 +334,7 @@ def main():
         ["Pipeline de GitHub Actions y README", "Sí", "Escribió el flujo de trabajo y la documentación", "Se valida con la ejecución en GitHub"],
         ["Requisitos, plan de pruebas (Sprint 1 y 2)", "No", "—", "Responsables: el equipo"],
         ["Descarga de las 11 fotos temporales al proyecto", "Sí", "Las descargó, las optimizó y cambió las rutas; repitió las 68 pruebas", "Verificado con 68 de 68 aprobadas"],
+        ["Rediseño del dashboard, validación por campo y rendimiento", "Sí", "Escribió el código y midió con Lighthouse", "Equipo lo pidió; 68 de 68 y Lighthouse 94 a 100"],
         ["Fotos propias, Jira y revisión final", "No", "—", "Responsables: el equipo"]], [3.6, 0.9, 4.0, 3.65], 11, 0.55, color_col=(1, {"Sí": VERDE, "No": GRIS}))
 
     # 13 bloqueos
@@ -355,14 +356,14 @@ def main():
     # 14 cierre
     sl = nueva(prs, "Conclusiones y próximos pasos", "Calidad medible y repetible",
                f"Cerramos con las conclusiones. Se automatizaron {total} pruebas de tres niveles, todas aprobadas, con {tot_cob[2]:.1f} % de cobertura en el backend, y los 44 casos del plan del Sprint 2 tienen resultado real. "
-               "Los defectos se corrigieron y quedaron cubiertos. El pipeline detecta regresiones solo. Los próximos pasos son medir Lighthouse y accesibilidad, reemplazar las fotos temporales y mantener el tablero de Jira al día. Tiempo: 1 minuto.")
+               "Los defectos se corrigieron y quedaron cubiertos. El pipeline detecta regresiones solo. Los próximos pasos son validar la interfaz con usuarios reales, reemplazar las fotos temporales y mantener el tablero de Jira al día. Tiempo: 1 minuto.")
     rect(sl, 0.6, 1.6, 6.0, 5.2, CARD)
     texto(sl, 0.8, 1.7, 5.6, 0.4, "Conclusiones", 18, VERDE, True)
     viñetas(sl, 0.8, 2.25, 5.6, 4.5, [f"**{total} pruebas** automáticas en tres niveles, **{ok} aprobadas**", f"**{tot_cob[2]:.1f} %** de cobertura de líneas en el backend", "Los **44 casos** del plan del Sprint 2, ejecutados con evidencia",
-                                      "**7 defectos** reales hallados, corregidos y con prueba de regresión", "El pipeline repite todo en cada cambio y cada lunes"], 14, sep=8)
+                                      "**7 defectos** reales hallados, corregidos y con prueba de regresión", "**Lighthouse**: rendimiento 94 y 97, accesibilidad 100", "El pipeline repite todo en cada cambio y cada lunes"], 14, sep=8)
     rect(sl, 6.85, 1.6, 5.9, 5.2, CARD)
     texto(sl, 7.05, 1.7, 5.5, 0.4, "Próximos pasos", 18, AMBAR, True)
-    viñetas(sl, 7.05, 2.25, 5.5, 4.5, ["Medir **Lighthouse** y accesibilidad con axe en la interfaz", "Reemplazar las fotos temporales por las fotos propias", "Interfaz publicada en Vercel (modo demostración): coffeeexport-manager.vercel.app",
+    viñetas(sl, 7.05, 2.25, 5.5, 4.5, ["Validar la interfaz rediseñada con usuarios reales", "Reemplazar las fotos temporales por las fotos propias", "Activar la verificación en dos pasos en GitHub, Vercel y Atlassian",
                                        "Mantener el tablero de Jira al día", "Ampliar pruebas de carga y de accesibilidad"], 14, sep=8)
 
     os.makedirs(os.path.dirname(SALIDA), exist_ok=True)

@@ -472,11 +472,11 @@ Views.reportes = () => {
     }
     countUp($("#r-out"));
     const R = window._reporte;
-    $("#r-pdf") && ($("#r-pdf").onclick = () => { try { const {jsPDF} = window.jspdf; const doc = new jsPDF({orientation:"landscape"});
+    $("#r-pdf") && ($("#r-pdf").onclick = async () => { try { await cargarLibs("pdf"); const {jsPDF} = window.jspdf; const doc = new jsPDF({orientation:"landscape"});
       doc.setFontSize(16); doc.text("CoffeeExport Manager · RITECH SAS", 14, 16); doc.setFontSize(11); doc.text(`${R.title} - ${fdate(R.desde)} a ${fdate(R.hasta)}`, 14, 24);
       doc.autoTable({head:[R.head], body:R.rows.map(r => r.map(c => typeof c === "number" ? nf(c, Number.isInteger(c) ? 0 : 2) : c)), startY:30, headStyles:{fillColor:[14, 124, 107]}, styles:{fontSize:9}});
       doc.save(`reporte_${R.desde}_${R.hasta}.pdf`); toast("PDF generado"); } catch (e) { toast("No se pudo generar el PDF (librería no disponible sin conexión).", "danger"); } });
-    $("#r-xls") && ($("#r-xls").onclick = () => { try { const ws = XLSX.utils.aoa_to_sheet([R.head, ...R.rows]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Reporte"); XLSX.writeFile(wb, `reporte_${R.desde}_${R.hasta}.xlsx`); toast("Excel generado"); } catch (e) { toast("No se pudo generar el Excel (librería no disponible sin conexión).", "danger"); } });
+    $("#r-xls") && ($("#r-xls").onclick = async () => { try { await cargarLibs("xls"); const ws = XLSX.utils.aoa_to_sheet([R.head, ...R.rows]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Reporte"); XLSX.writeFile(wb, `reporte_${R.desde}_${R.hasta}.xlsx`); toast("Excel generado"); } catch (e) { toast("No se pudo generar el Excel (librería no disponible sin conexión).", "danger"); } });
   };
   $("#r-gen").onclick = gen; gen();
 };

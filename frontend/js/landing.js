@@ -12,7 +12,7 @@
 
   /* ---------- tema ---------- */
   const root = document.documentElement, themeIc = $("#theme-ic");
-  const paintTheme = () => { themeIc.className = "ph " + (root.dataset.theme === "dark" ? "ph-sun" : "ph-moon"); };
+  const paintTheme = () => { themeIc.className = "bi " + (root.dataset.theme === "dark" ? "bi-sun" : "bi-moon-stars"); };
   paintTheme();
   $("#theme").addEventListener("click", () => {
     root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
@@ -48,11 +48,11 @@
 
   const cardHTML = p => {
     const s = stockDe(p.id), low = minDe(p.id) > 0 && s < minDe(p.id), sin = s <= 0;
-    return `<button class="card" type="button" data-id="${p.id}" data-tipo="${p.tipo}" aria-label="Ver detalle de ${esc(p.nombre)}">
+    return `<button class="card" type="button" data-id="${p.id}" data-tipo="${p.tipo}">
       <div class="card-img"><img src="${foto(p, 700)}" width="700" height="770" loading="lazy" alt="${esc(p.nombre)}, ${p.tipo === "CAFE" ? "café" : "cacao"} variedad ${esc(p.variedad || "estándar")}"></div>
       <div class="card-b"><h3>${esc(p.nombre)}</h3><span class="card-var">${p.tipo === "CAFE" ? "Café" : "Cacao"}${p.variedad ? ", " + esc(p.variedad) : ""}</span>
         <div class="card-row"><span class="price">USD ${nf(p.precio, 2)} <small>/kg</small></span><span class="avail ${sin || low ? "low" : "ok"}">${sin ? "Agotado" : low ? "Stock bajo" : "Disponible"}</span></div>
-        <span class="card-more">Ver detalle <i class="ph ph-arrow-right"></i></span></div></button>`;
+        <span class="card-more">Ver detalle <i class="bi bi-arrow-right"></i></span></div></button>`;
   };
   const skeleton = n => Array.from({length:n}, () => `<div class="sk" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>`).join("");
 
@@ -60,7 +60,7 @@
   grid.innerHTML = skeleton(Math.min(6, Math.max(3, activos.length)));
   grid.setAttribute("aria-busy", "true");
   setTimeout(() => {
-    if (!activos.length) { grid.innerHTML = `<div class="empty"><i class="ph ph-package"></i>Aún no hay productos activos en el catálogo.</div>`; grid.removeAttribute("aria-busy"); return; }
+    if (!activos.length) { grid.innerHTML = `<div class="empty"><i class="bi bi-box-seam"></i>Aún no hay productos activos en el catálogo.</div>`; grid.removeAttribute("aria-busy"); return; }
     grid.innerHTML = activos.map(cardHTML).join(""); grid.removeAttribute("aria-busy");
     if (!reduce) $$(".card", grid).forEach((c, i) => c.animate([{opacity:0, transform:"translateY(24px)"}, {opacity:1, transform:"none"}], {duration:700, delay:i * 70, easing:"cubic-bezier(.16,1,.3,1)", fill:"backwards"}));
   }, reduce ? 0 : 650);
