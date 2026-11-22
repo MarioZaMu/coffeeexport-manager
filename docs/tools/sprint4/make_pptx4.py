@@ -347,7 +347,7 @@ def main():
               ["Las pruebas *IT no se ejecutaban", "Se configuró Failsafe con el mismo argLine", "Resuelto"],
               ["CORS bloqueaba la web (D-07)", "Bean renombrado y CorsIT", "Resuelto"],
               ["Playwright sin su Chromium", "PW_CHANNEL=chrome; en CI se instala Chromium", "Resuelto"],
-              ["Spring Boot no corre en Vercel", "La web se publica en modo demostración", "Mitigado"],
+              ["Spring Boot no corre en Vercel", "Publicada en modo demostración: coffeeexport-manager.vercel.app", "Mitigado"],
               ["Sin MySQL para probar el perfil mysql", "MySQL 8.4.10 portable en tools/; suite completa (139) aprobada en MySQL real", "Resuelto"],
               ["Sin fotos propias del producto", "11 fotos temporales (Unsplash) alojadas en el proyecto; se reemplazan por archivos propios", "Mitigado"]]
     tabla(sl, 0.6, 1.5, 12.15, ["Bloqueo", "Solución", "Estado"], cortos, [4.6, 5.6, 1.2], 11.5, 0.54, color_col=(2, {"Resuelto": VERDE, "Mitigado": AMBAR, "Pendiente": ROJO}))
@@ -362,7 +362,7 @@ def main():
                                       "**7 defectos** reales hallados, corregidos y con prueba de regresión", "El pipeline repite todo en cada cambio y cada lunes"], 14, sep=8)
     rect(sl, 6.85, 1.6, 5.9, 5.2, CARD)
     texto(sl, 7.05, 1.7, 5.5, 0.4, "Próximos pasos", 18, AMBAR, True)
-    viñetas(sl, 7.05, 2.25, 5.5, 4.5, ["Medir **Lighthouse** y accesibilidad con axe en la interfaz", "Reemplazar las fotos temporales por las fotos propias", "Publicar la interfaz en Vercel (modo demostración)",
+    viñetas(sl, 7.05, 2.25, 5.5, 4.5, ["Medir **Lighthouse** y accesibilidad con axe en la interfaz", "Reemplazar las fotos temporales por las fotos propias", "Interfaz publicada en Vercel (modo demostración): coffeeexport-manager.vercel.app",
                                        "Mantener el tablero de Jira al día", "Ampliar pruebas de carga y de accesibilidad"], 14, sep=8)
 
     os.makedirs(os.path.dirname(SALIDA), exist_ok=True)

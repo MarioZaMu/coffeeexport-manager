@@ -51,7 +51,7 @@ El pipeline `.github/workflows/tests.yml` ejecuta todo en cada push, en cada pul
 
 ## Despliegue
 
-La web estática (`frontend/`) se publica en Vercel en modo demostración. Spring Boot no se ejecuta en Vercel: el sistema conectado corre localmente y en el pipeline de pruebas.
+La web estática (`frontend/`) está publicada en Vercel en modo demostración: https://coffeeexport-manager.vercel.app (usuarios de prueba en la pantalla de acceso). Spring Boot no se ejecuta en Vercel: el sistema conectado corre localmente y en el pipeline de pruebas.
 
 ## Uso de IA
 

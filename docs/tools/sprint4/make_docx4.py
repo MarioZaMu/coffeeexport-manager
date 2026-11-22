@@ -447,7 +447,7 @@ def main():
               "Los 44 casos del plan del Sprint 2 pasaron de planificados a ejecutados con evidencia.",
               "Las pruebas encontraron 7 defectos reales; cada uno quedó corregido y cubierto por una prueba de regresión.",
               "El pipeline repite todo automáticamente en cada cambio y cada lunes, por lo que una regresión se detecta sin intervención humana.",
-              "Se verificó además la suite del backend contra **MySQL 8.4.10 real**: 139 de 139. **Pendiente:** medir Lighthouse y accesibilidad, reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo, y publicar la interfaz en Vercel en modo demostración."):
+              "Se verificó además la suite del backend contra **MySQL 8.4.10 real**: 139 de 139. **Pendiente:** medir Lighthouse y accesibilidad, reemplazar las fotos temporales (ya alojadas en el proyecto) por las del equipo. La interfaz ya está publicada en modo demostración en https://coffeeexport-manager.vercel.app."):
         vineta(doc, s)
 
     # ---- anexos
