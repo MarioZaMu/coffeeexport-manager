@@ -70,6 +70,7 @@ a{color:var(--cem-accent)} a:hover{color:var(--cem-accent-d)}
 /* Escritorio: foto a la izquierda con mensaje y cifras abajo; formulario amplio a la derecha.
    Móvil: franja de foto con la marca arriba y el formulario como tarjeta que se monta encima. */
 #login-view{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);background:var(--cem-bg)}
+html.pre-login #login-view[hidden]{display:grid!important}
 #login-view.leaving{animation:login-out .36s var(--ease) forwards}
 @keyframes login-out{to{opacity:0;transform:scale(.985)}}
 .login-hero{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:2rem;color:#fff;padding:clamp(1.5rem,3vw,2.75rem);overflow:hidden;isolation:isolate;background:#0e2c24}

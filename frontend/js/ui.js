@@ -161,7 +161,7 @@ const chartAccent = () => cssv("--cem-chart"), chartGrid = () => cssv("--cem-gri
 /* Librerías pesadas (PDF y Excel) solo se descargan cuando alguien exporta un reporte */
 const _libs = {};
 const cargarScript = url => _libs[url] || (_libs[url] = new Promise((ok, mal) => { const s = document.createElement("script"); s.src = url; s.onload = ok; s.onerror = () => { delete _libs[url]; mal(new Error("No se pudo cargar " + url)); }; document.head.appendChild(s); }));
-const LIBS = {pdf:["https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"], xls:["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]};
+const LIBS = {chart:["https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"], pdf:["https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"], xls:["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]};
 async function cargarLibs(tipo) { for (const u of LIBS[tipo]) await cargarScript(u); }   // en orden: autotable necesita jsPDF
 const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 function mkChart(id, cfg) {

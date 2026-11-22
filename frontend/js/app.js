@@ -20,7 +20,7 @@ const ROL_UI = {ADMIN:["bi-shield-lock", 1, "Acceso total y usuarios"], GERENTE:
   OP_EXPORTACIONES:["bi-truck", 2, "Clientes, envíos y documentos"], OP_BODEGA:["bi-box-seam", 4, "Inventario y movimientos"], CONTADOR:["bi-cash-coin", 1, "Pagos y finanzas"]};
 const LAST_DEMO = "cem_last_demo";
 function showLogin(msg) {
-  killCharts(); Session.user = null; $("#app").hidden = true; const lv = $("#login-view"); lv.classList.remove("leaving"); lv.hidden = false;
+  killCharts(); Session.user = null; $("#app").hidden = true; document.documentElement.classList.remove("pre-login"); const lv = $("#login-view"); lv.classList.remove("leaving"); lv.hidden = false;
   $("#hero-logo").innerHTML = logoSVG(30, "#f5b041", "#14523f");
   $("#lh-stats").innerHTML = [[Object.keys(EU).length, "países de la UE"], [PUERTOS_SALIDA.length, "puertos de salida"], [DOCS_OBLIGATORIOS.length, "documentos por envío"]]
     .map(([n, t]) => `<li><b>${n}</b><span>${t}</span></li>`).join("");
@@ -35,6 +35,7 @@ function showLogin(msg) {
   });
   const err = $("#login-error"); err.hidden = !msg; err.textContent = msg || "";
   history.replaceState(null, "", location.pathname);
+  setTimeout(() => cargarLibs("chart").catch(() => {}), 3000);   // se adelanta la descarga mientras el usuario escribe
 }
 /* Transición corta del login al sistema (se omite con movimiento reducido) */
 function entrar() {
@@ -61,14 +62,15 @@ async function doLogin(e) {
 
 /* ---------------- App ---------------- */
 function startApp(fresh) {
-  const u = Session.user; $("#login-view").hidden = true; $("#app").hidden = false;
+  const u = Session.user; document.documentElement.classList.remove("pre-login"); $("#login-view").hidden = true; $("#app").hidden = false;
   $("#side-logo").innerHTML = logoSVG(36, "#f5b041", "#14523f");
   $("#u-name").textContent = u.nombre.split(" ")[0] === "Administrador" ? "Admin" : u.nombre; $("#u-role").textContent = ROLES[u.rol].nombre; $("#u-mail").textContent = u.email;
   $("#u-avatar").textContent = u.nombre.split(" ").map(x => x[0]).slice(0, 2).join("").toUpperCase();
   $("#nav").innerHTML = MODULOS.filter(m => can(m.id)).map(m => `<li><a href="#${m.id}" data-m="${m.id}"><i class="bi ${m.icon}"></i><span>${m.label}</span></a></li>`).join("");
   $(".side-foot").innerHTML = Api.on ? `Conectado al servidor<br>${esc(new URL(Api.base).host)}` : "Modo demostración<br>Datos en este navegador";
   refreshBell();
-  if (fresh || !location.hash) location.hash = "#" + HOME[u.rol]; else route();
+  /* Chart.js se descarga después del login (no compite con la foto del login); si falla, las gráficas muestran su estado de error */
+  cargarLibs("chart").catch(() => {}).finally(() => { if (Session.user !== u) return; if (fresh || !location.hash) location.hash = "#" + HOME[u.rol]; else route(); });
 }
 function route() {
   if (!Session.user) return;
