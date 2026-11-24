@@ -2,5 +2,12 @@
   "framework": null,
   "installCommand": "",
   "buildCommand": "",
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "redirects": [
+    { "source": "/sprint4", "destination": "/app.html?api=https://coffeeexport-manager.vercel.app", "permanent": false },
+    { "source": "/sprint3", "destination": "/app.html?api=off", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://coffeeexport-backend.onrender.com/api/:path*" }
+  ]
 }
